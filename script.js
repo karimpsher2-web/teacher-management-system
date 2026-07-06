@@ -1,789 +1,1029 @@
-// ============================================================
-// 1. تحميل البيانات
-// ============================================================
-function getDefaultData() {
-  return {
-    name: 'مستر كريم',
-    title: 'معلم العلوم والعلوم المتكاملة - عام ولغات',
-    bio: 'ابتدائي - إعدادي - ثانوي',
-    avatar: 'https://i.pravatar.cc/300?img=12',
-    counters: { students: 1250, experience: 4, courses: 24, certificates: 12 },
-    accounts: [
-      { name: 'يوتيوب', url: '#', icon: 'fab fa-youtube', platform: 'youtube' },
-      { name: 'فيسبوك', url: 'https://www.facebook.com/share/1DnNff9zJm/', icon: 'fab fa-facebook', platform: 'facebook' },
-      { name: 'تيك توك', url: '#', icon: 'fab fa-tiktok', platform: 'tiktok' },
-      { name: 'تيليجرام', url: '#', icon: 'fab fa-telegram', platform: 'telegram' },
-      { name: 'إنستجرام', url: 'https://www.instagram.com/karim_psher', icon: 'fab fa-instagram', platform: 'instagram' },
-      { name: 'واتساب', url: 'https://wa.me/201060949401', icon: 'fab fa-whatsapp', platform: 'whatsapp' },
-      { name: 'لينكدإن', url: '#', icon: 'fab fa-linkedin', platform: 'linkedin' },
-      { name: 'تويتر', url: '#', icon: 'fab fa-twitter', platform: 'twitter' }
-    ],
-    certificates: [
-      { name: 'Microsoft Certified Educator', url: 'https://via.placeholder.com/300x200/FF0000/fff?text=Microsoft' },
-      { name: 'Education Expert', url: 'https://via.placeholder.com/300x200/10b981/fff?text=Education' },
-      { name: 'Problem Solving Skills', url: 'https://via.placeholder.com/300x200/f59e0b/fff?text=Problem' },
-      { name: 'Microsoft Office 2019', url: 'https://via.placeholder.com/300x200/ef4444/fff?text=Office' },
-      { name: 'شهادة شكر', url: 'https://via.placeholder.com/300x200/8b5cf6/fff?text=%D8%B4%D9%83%D8%B1' },
-      { name: 'AI & Cyber Security', url: 'https://via.placeholder.com/300x200/06b6d4/fff?text=AI' },
-      { name: 'Marketing', url: 'https://via.placeholder.com/300x200/f97316/fff?text=Marketing' }
-    ],
-    gallery: [
-      'https://picsum.photos/seed/teach1/400/300',
-      'https://picsum.photos/seed/teach2/400/300',
-      'https://picsum.photos/seed/teach3/400/300',
-      'https://picsum.photos/seed/teach4/400/300'
-    ],
-    achievements: [
-      { icon: 'fa-award', number: 12, label: 'جوائز' },
-      { icon: 'fa-users', number: 300, label: 'طلاب متميزون' },
-      { icon: 'fa-book-open', number: 15, label: 'كتب منشورة' }
-    ]
-  };
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Cairo', sans-serif;
+  background: #f5f7fc;
+  color: #1e293b;
+  transition: background 0.3s, color 0.3s;
+  scroll-behavior: smooth;
+}
+body.dark {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 }
 
-function loadData() {
-  try {
-    const saved = localStorage.getItem('teacherData');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-  } catch (e) {
-    console.log('خطأ في تحميل البيانات، سيتم استخدام البيانات الافتراضية');
-  }
-  return getDefaultData();
+/* Loading */
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #1e293b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s;
 }
-
-let data = loadData();
-
-// ============================================================
-// 2. حفظ البيانات
-// ============================================================
-function saveData() {
-  try {
-    localStorage.setItem('teacherData', JSON.stringify(data));
-    showSaveNotice();
-  } catch (e) {
-    console.log('خطأ في حفظ البيانات');
+#loading-screen.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+.loader {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #e2e8f0;
+  border-top: 6px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
+.loader-text {
+  margin-top: 20px;
+  color: #e2e8f0;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
 
-function showSaveNotice() {
-  const notice = document.getElementById('saveNotice');
-  if (notice) {
-    notice.style.display = 'block';
-    setTimeout(() => { notice.style.display = 'none'; }, 2000);
+/* Buttons */
+.btn-primary {
+  background: #3b82f6;
+  color: #fff;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 40px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-primary:hover {
+  background: #2563eb;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(59, 130, 246, 0.4);
+}
+.btn-secondary {
+  background: transparent;
+  border: 2px solid #3b82f6;
+  color: #3b82f6;
+  padding: 10px 24px;
+  border-radius: 40px;
+  font-weight: 600;
+  transition: all 0.3s;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-secondary:hover {
+  background: #3b82f6;
+  color: #fff;
+}
+.btn-sm {
+  padding: 6px 18px;
+  font-size: 0.9rem;
+}
+.btn-danger {
+  background: #ef4444;
+  color: #fff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 0.8rem;
+}
+.btn-danger:hover {
+  background: #dc2626;
+}
+.btn-success {
+  background: #22c55e;
+  color: #fff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 0.8rem;
+}
+.btn-success:hover {
+  background: #16a34a;
+}
+.btn-warning {
+  background: #f59e0b;
+  color: #fff;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 0.8rem;
+}
+.btn-warning:hover {
+  background: #d97706;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+.logo {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #3b82f6;
+  letter-spacing: -1px;
+}
+.nav-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+.theme-toggle {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #1e293b;
+  transition: 0.3s;
+}
+.dark .theme-toggle {
+  color: #e2e8f0;
+}
+
+/* Hero */
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 40px;
+  padding: 40px 0 60px;
+}
+.hero-content {
+  flex: 1 1 300px;
+}
+.hero-avatar {
+  flex: 0 0 180px;
+  text-align: center;
+}
+.hero-avatar img {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border: 4px solid #fff;
+}
+.dark .hero-avatar img {
+  border-color: #1e293b;
+}
+.hero h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+}
+.hero .title {
+  font-size: 1.3rem;
+  color: #3b82f6;
+  font-weight: 600;
+}
+.hero .bio {
+  margin: 16px 0 24px;
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+.hero-buttons {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+/* Features */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+}
+.feature-item {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(4px);
+  padding: 20px 16px;
+  border-radius: 20px;
+  text-align: center;
+  transition: 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.dark .feature-item {
+  background: rgba(30, 41, 59, 0.3);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+.feature-item:hover {
+  transform: translateY(-5px);
+}
+.feature-item .icon {
+  font-size: 2rem;
+  color: #3b82f6;
+  margin-bottom: 8px;
+}
+.feature-item h4 {
+  font-weight: 700;
+}
+.feature-item p {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+/* Counters */
+.counters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 24px;
+  padding: 30px 0 50px;
+}
+.counter-item {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(4px);
+  padding: 20px 10px;
+  border-radius: 24px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  transition: 0.3s;
+  position: relative;
+}
+.dark .counter-item {
+  background: rgba(30, 41, 59, 0.5);
+}
+.counter-item .number {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #3b82f6;
+}
+.counter-item .label {
+  font-weight: 600;
+  margin-top: 6px;
+}
+.counter-item .counter-edit-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  color: #3b82f6;
+  transition: 0.3s;
+  display: none;
+}
+.counter-item:hover .counter-edit-btn {
+  display: block;
+}
+
+/* Sections */
+section {
+  padding: 50px 0;
+}
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  position: relative;
+  display: inline-block;
+}
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  right: 0;
+  width: 60px;
+  height: 4px;
+  background: #3b82f6;
+  border-radius: 4px;
+}
+
+/* Accounts */
+.accounts-grid,
+.certificates-grid,
+.achievements-grid,
+.gallery-grid {
+  display: grid;
+  gap: 24px;
+}
+.accounts-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+.account-card {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(6px);
+  padding: 20px 16px;
+  border-radius: 24px;
+  text-align: center;
+  transition: 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+.dark .account-card {
+  background: rgba(30, 41, 59, 0.3);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+.account-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+}
+.account-card .platform-icon {
+  font-size: 2.8rem;
+  margin-bottom: 8px;
+}
+.account-card h4 {
+  font-weight: 700;
+}
+.account-card p {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+.account-card .btn-sm {
+  margin-top: 12px;
+  padding: 6px 18px;
+  font-size: 0.9rem;
+}
+
+/* Platform Colors */
+.platform-youtube .platform-icon {
+  color: #FF0000;
+}
+.platform-facebook .platform-icon {
+  color: #1877F2;
+}
+.platform-tiktok .platform-icon {
+  color: #000000;
+}
+.dark .platform-tiktok .platform-icon {
+  color: #ffffff;
+}
+.platform-telegram .platform-icon {
+  color: #26A5E4;
+}
+.platform-instagram .platform-icon {
+  color: #E4405F;
+}
+.platform-whatsapp .platform-icon {
+  color: #25D366;
+}
+.platform-linkedin .platform-icon {
+  color: #0A66C2;
+}
+.platform-twitter .platform-icon {
+  color: #1DA1F2;
+}
+
+/* Certificates */
+.certificates-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}
+.cert-card {
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  background: #fff;
+  position: relative;
+}
+.dark .cert-card {
+  background: #1e293b;
+}
+.cert-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+  transition: 0.3s;
+}
+.cert-card:hover img {
+  transform: scale(1.05);
+}
+.cert-card .cert-name {
+  padding: 12px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Achievements */
+.achievements-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+.achievement-card {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  padding: 24px 16px;
+  border-radius: 24px;
+  text-align: center;
+  transition: 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+.dark .achievement-card {
+  background: rgba(30, 41, 59, 0.3);
+}
+.achievement-card .icon {
+  font-size: 2.8rem;
+  color: #3b82f6;
+}
+.achievement-card .number {
+  font-size: 2rem;
+  font-weight: 800;
+}
+.achievement-card .label {
+  font-weight: 600;
+}
+
+/* Gallery */
+.gallery-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+.gallery-item-wrapper {
+  position: relative;
+}
+.gallery-item-wrapper img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+.gallery-item-wrapper img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+}
+.gallery-item-wrapper .gallery-delete-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: 0.3s;
+  z-index: 10;
+}
+.gallery-item-wrapper:hover .gallery-delete-btn {
+  opacity: 1;
+}
+
+/* Testimonials */
+.testimonial-slider {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  padding: 10px 0 20px;
+  scroll-snap-type: x mandatory;
+}
+.testimonial-slider .testimonial-item {
+  min-width: 280px;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(4px);
+  padding: 24px;
+  border-radius: 24px;
+  scroll-snap-align: start;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+.dark .testimonial-item {
+  background: rgba(30, 41, 59, 0.3);
+}
+.testimonial-item .stars {
+  color: #facc15;
+  margin: 8px 0;
+}
+.testimonial-item .student-name {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.testimonial-item .student-name img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* FAQ */
+.faq-item {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  margin-bottom: 12px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.dark .faq-item {
+  background: rgba(30, 41, 59, 0.2);
+}
+.faq-question {
+  padding: 18px 24px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  transition: 0.3s;
+}
+.faq-question:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, padding 0.3s;
+  padding: 0 24px;
+}
+.faq-answer.open {
+  max-height: 200px;
+  padding: 0 24px 20px;
+}
+
+/* Contact */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+.contact-info i {
+  width: 28px;
+  color: #3b82f6;
+}
+.contact-info p {
+  margin: 12px 0;
+}
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  border-radius: 30px;
+  border: 1px solid #ddd;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(4px);
+  font-family: 'Cairo', sans-serif;
+}
+.dark .contact-form input,
+.dark .contact-form textarea {
+  background: rgba(30, 41, 59, 0.4);
+  border-color: #334155;
+  color: #e2e8f0;
+}
+.contact-form textarea {
+  min-height: 120px;
+  border-radius: 24px;
+}
+
+/* Social Links */
+.social-links-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+.social-link-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+  transition: 0.3s;
+  text-decoration: none;
+  color: #1e293b;
+  font-weight: 600;
+}
+.dark .social-link-item {
+  background: rgba(30, 41, 59, 0.3);
+  color: #e2e8f0;
+}
+.social-link-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+.social-link-item i {
+  font-size: 1.6rem;
+}
+.social-link-item.whatsapp i {
+  color: #25D366;
+}
+.social-link-item.instagram i {
+  color: #E4405F;
+}
+.social-link-item.facebook i {
+  color: #1877F2;
+}
+.social-link-item.youtube i {
+  color: #FF0000;
+}
+.social-link-item.tiktok i {
+  color: #000000;
+}
+.dark .social-link-item.tiktok i {
+  color: #ffffff;
+}
+.social-link-item.telegram i {
+  color: #26A5E4;
+}
+.social-link-item.linkedin i {
+  color: #0A66C2;
+}
+.social-link-item.twitter i {
+  color: #1DA1F2;
+}
+
+/* Footer */
+.footer {
+  padding: 40px 0 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+.dark .footer {
+  border-color: rgba(255, 255, 255, 0.05);
+}
+.footer-social a {
+  margin-left: 16px;
+  font-size: 1.8rem;
+  transition: 0.3s;
+  display: inline-block;
+}
+.footer-social a:hover {
+  transform: translateY(-3px) scale(1.1);
+}
+.footer-social .fa-youtube {
+  color: #FF0000;
+}
+.footer-social .fa-facebook {
+  color: #1877F2;
+}
+.footer-social .fa-tiktok {
+  color: #000000;
+}
+.dark .footer-social .fa-tiktok {
+  color: #ffffff;
+}
+.footer-social .fa-telegram {
+  color: #26A5E4;
+}
+.footer-social .fa-instagram {
+  color: #E4405F;
+}
+.footer-social .fa-whatsapp {
+  color: #25D366;
+}
+.footer-social .fa-linkedin {
+  color: #0A66C2;
+}
+.footer-social .fa-twitter {
+  color: #1DA1F2;
+}
+.back-top {
+  cursor: pointer;
+  font-size: 1.4rem;
+}
+
+/* Dashboard */
+.dashboard-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+.dashboard-overlay.open {
+  display: block;
+}
+.dashboard-panel {
+  position: fixed;
+  left: -450px;
+  top: 0;
+  width: 450px;
+  height: 100vh;
+  background: #f8fafc;
+  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.2);
+  padding: 30px 24px;
+  overflow-y: auto;
+  transition: left 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 1000;
+}
+.dark .dashboard-panel {
+  background: #1e293b;
+}
+.dashboard-panel.open {
+  left: 0;
+}
+.dashboard-panel h3 {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.dashboard-panel .close-dashboard {
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: #ef4444;
+}
+.dashboard-panel .control-group {
+  margin-bottom: 28px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+.dark .dashboard-panel .control-group {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+.dashboard-panel label {
+  display: block;
+  font-weight: 600;
+  margin-top: 12px;
+}
+.dashboard-panel input,
+.dashboard-panel select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 30px;
+  border: 1px solid #ccc;
+  margin-top: 6px;
+  font-family: 'Cairo', sans-serif;
+}
+.dark .dashboard-panel input,
+.dark .dashboard-panel select {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+.dashboard-panel .btn-primary {
+  width: 100%;
+  margin-top: 12px;
+}
+.dashboard-toggle {
+  position: fixed;
+  bottom: 30px;
+  left: 30px;
+  z-index: 998;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 60px;
+  padding: 14px 24px;
+  font-weight: 700;
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+  cursor: pointer;
+  transition: 0.3s;
+}
+.dashboard-toggle:hover {
+  transform: scale(1.05);
+}
+.dashboard-panel .item-list {
+  margin-top: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+.dashboard-panel .item-list .list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  margin-bottom: 6px;
+}
+.dark .dashboard-panel .item-list .list-item {
+  background: rgba(255, 255, 255, 0.05);
+}
+.dashboard-panel .item-list .list-item .item-name {
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+.dashboard-panel .item-list .list-item .btn-danger {
+  padding: 4px 12px;
+  font-size: 0.7rem;
+}
+.dashboard-panel .item-list .list-item .btn-warning {
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  margin-left: 4px;
+}
+
+/* Password Modal */
+.password-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1001;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.password-modal.open {
+  display: flex;
+}
+.password-modal .modal-content {
+  background: #fff;
+  padding: 40px;
+  border-radius: 30px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+.dark .password-modal .modal-content {
+  background: #1e293b;
+}
+.password-modal .modal-content h3 {
+  margin-bottom: 20px;
+}
+.password-modal .modal-content input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 30px;
+  border: 1px solid #ddd;
+  font-family: 'Cairo', sans-serif;
+  margin-bottom: 16px;
+}
+.dark .password-modal .modal-content input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+.password-modal .modal-content .error {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  display: none;
+}
+
+/* Lightbox */
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: fadeIn 0.3s;
+}
+.lightbox-overlay img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
-// ============================================================
-// 3. رفع الصور من الجهاز
-// ============================================================
-let uploadedImageData = null;
-
-// تأكد من وجود العناصر قبل إضافة الأحداث
-document.addEventListener('DOMContentLoaded', function() {
-  const fileInput = document.getElementById('fileInput');
-  if (fileInput) {
-    fileInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          uploadedImageData = event.target.result;
-          const preview = document.getElementById('uploadPreview');
-          const previewImg = document.getElementById('previewImg');
-          if (preview) preview.style.display = 'block';
-          if (previewImg) previewImg.src = uploadedImageData;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
   }
-});
-
-function useUploadedImage() {
-  if (uploadedImageData) {
-    data.avatar = uploadedImageData;
-    const avatar = document.getElementById('profile-avatar');
-    const avatarUrl = document.getElementById('avatar-url');
-    if (avatar) avatar.src = uploadedImageData;
-    if (avatarUrl) avatarUrl.value = uploadedImageData;
-    saveData();
-    clearUpload();
-    alert('✅ تم تحديث الصورة الشخصية وحفظها!');
+  .hero-buttons {
+    justify-content: center;
+  }
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+  .dashboard-panel {
+    width: 100%;
+    left: -100%;
+  }
+  .certificates-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  .social-links-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
 }
 
-function useUploadedImageForCert() {
-  if (uploadedImageData) {
-    const certUrl = document.getElementById('new-cert-url');
-    if (certUrl) certUrl.value = uploadedImageData;
-    clearUpload();
-    alert('✅ تم إضافة رابط الصورة في حقل الشهادة!');
-  }
+.fade-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s, transform 0.6s;
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-function useUploadedImageForGallery() {
-  if (uploadedImageData) {
-    const galleryUrl = document.getElementById('new-gallery-url');
-    if (galleryUrl) galleryUrl.value = uploadedImageData;
-    clearUpload();
-    alert('✅ تم إضافة رابط الصورة في حقل معرض الصور!');
-  }
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
 }
 
-function clearUpload() {
-  const preview = document.getElementById('uploadPreview');
-  const fileInput = document.getElementById('fileInput');
-  if (preview) preview.style.display = 'none';
-  if (fileInput) fileInput.value = '';
-  uploadedImageData = null;
+.save-notice {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #22c55e;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 40px;
+  font-weight: 600;
+  z-index: 999;
+  display: none;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
 }
 
-// ============================================================
-// 4. عرض البيانات (مع التحقق من وجود العناصر)
-// ============================================================
-function renderAll() {
-  try {
-    // Profile
-    const displayName = document.getElementById('display-name');
-    const displayTitle = document.getElementById('display-title');
-    const displayBio = document.getElementById('display-bio');
-    const profileAvatar = document.getElementById('profile-avatar');
-    
-    if (displayName) displayName.textContent = data.name;
-    if (displayTitle) displayTitle.textContent = data.title;
-    if (displayBio) displayBio.textContent = data.bio;
-    if (profileAvatar) profileAvatar.src = data.avatar;
-
-    // Dashboard inputs
-    const editName = document.getElementById('edit-name');
-    const editTitle = document.getElementById('edit-title');
-    const editBio = document.getElementById('edit-bio');
-    const avatarUrl = document.getElementById('avatar-url');
-    
-    if (editName) editName.value = data.name;
-    if (editTitle) editTitle.value = data.title;
-    if (editBio) editBio.value = data.bio;
-    if (avatarUrl) avatarUrl.value = data.avatar;
-
-    // Counters
-    const counters = ['students', 'experience', 'courses', 'certificates'];
-    counters.forEach(key => {
-      const input = document.getElementById('counter-' + key);
-      const display = document.getElementById('counter-' + key + '-display');
-      if (input) input.value = data.counters[key] || 0;
-      if (display) display.textContent = data.counters[key] || 0;
-    });
-
-    renderAccounts();
-    renderCertificates();
-    renderGallery();
-    renderAchievements();
-  } catch (e) {
-    console.log('خطأ في عرض البيانات:', e);
-  }
+.counter-edit-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
 }
-
-function renderAccounts() {
-  try {
-    const container = document.getElementById('accounts-container');
-    if (!container) return;
-    
-    container.innerHTML = data.accounts.map((acc) => `
-      <div class="account-card platform-${acc.platform || ''}">
-        <div class="platform-icon"><i class="${acc.icon}"></i></div>
-        <h4>${acc.name}</h4>
-        <p>${acc.url.replace(/^https?:\/\//, '').slice(0, 20) || 'رابط'}</p>
-        <a href="${acc.url}" target="_blank"><button class="btn-primary btn-sm">زيارة</button></a>
-      </div>
-    `).join('');
-
-    const list = document.getElementById('account-list');
-    if (list) {
-      list.innerHTML = data.accounts.map((acc, idx) => `
-        <div class="list-item">
-          <span class="item-name"><i class="${acc.icon}"></i> ${acc.name}</span>
-          <div>
-            <button class="btn-danger" onclick="removeAccount(${idx})">حذف</button>
-          </div>
-        </div>
-      `).join('');
-    }
-  } catch (e) {
-    console.log('خطأ في عرض الحسابات:', e);
-  }
+.counter-edit-popup.open {
+  display: flex;
 }
-
-function renderCertificates() {
-  try {
-    const container = document.getElementById('certificates-container');
-    if (!container) return;
-    
-    container.innerHTML = data.certificates.map((cert) => `
-      <div class="cert-card" onclick="openLightbox('${cert.url}')">
-        <img src="${cert.url}" alt="${cert.name}" onerror="this.src='https://via.placeholder.com/300x200/3b82f6/fff?text=شهادة'" />
-        <div class="cert-name">${cert.name}</div>
-      </div>
-    `).join('');
-
-    const list = document.getElementById('cert-list');
-    if (list) {
-      list.innerHTML = data.certificates.map((cert, idx) => `
-        <div class="list-item">
-          <span class="item-name">📜 ${cert.name}</span>
-          <div>
-            <button class="btn-warning" onclick="editCertificate(${idx})">تعديل</button>
-            <button class="btn-danger" onclick="removeCertificate(${idx})">حذف</button>
-          </div>
-        </div>
-      `).join('');
-    }
-  } catch (e) {
-    console.log('خطأ في عرض الشهادات:', e);
-  }
+.counter-edit-popup .popup-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 24px;
+  max-width: 400px;
+  width: 90%;
 }
-
-function renderGallery() {
-  try {
-    const container = document.getElementById('gallery-container');
-    if (!container) return;
-    
-    container.innerHTML = data.gallery.map((img, idx) => `
-      <div class="gallery-item-wrapper">
-        <img src="${img}" onclick="openLightbox('${img}')" onerror="this.src='https://via.placeholder.com/400x300/3b82f6/fff?text=صورة'" />
-        <button class="gallery-delete-btn" onclick="event.stopPropagation();removeGalleryImage(${idx})"><i class="fas fa-trash"></i></button>
-      </div>
-    `).join('');
-
-    const list = document.getElementById('gallery-list');
-    if (list) {
-      list.innerHTML = data.gallery.map((img, idx) => `
-        <div class="list-item">
-          <span class="item-name">🖼️ صورة ${idx + 1}</span>
-          <button class="btn-danger" onclick="removeGalleryImage(${idx})">حذف</button>
-        </div>
-      `).join('');
-    }
-  } catch (e) {
-    console.log('خطأ في عرض المعرض:', e);
-  }
+.dark .counter-edit-popup .popup-content {
+  background: #1e293b;
 }
-
-function renderAchievements() {
-  try {
-    const container = document.getElementById('achievements-container');
-    if (!container) return;
-    
-    container.innerHTML = data.achievements.map((ach) => `
-      <div class="achievement-card">
-        <div class="icon"><i class="fas ${ach.icon}"></i></div>
-        <div class="number">${ach.number}</div>
-        <div class="label">${ach.label}</div>
-      </div>
-    `).join('');
-
-    const list = document.getElementById('achievement-list');
-    if (list) {
-      list.innerHTML = data.achievements.map((ach, idx) => `
-        <div class="list-item">
-          <span class="item-name"><i class="fas ${ach.icon}"></i> ${ach.label} (${ach.number})</span>
-          <div>
-            <button class="btn-warning" onclick="editAchievement(${idx})">تعديل</button>
-            <button class="btn-danger" onclick="removeAchievement(${idx})">حذف</button>
-          </div>
-        </div>
-      `).join('');
-    }
-  } catch (e) {
-    console.log('خطأ في عرض الإنجازات:', e);
-  }
+.counter-edit-popup .popup-content h4 {
+  margin-bottom: 16px;
 }
-
-// ============================================================
-// 5. دوال التعديل (مع التحقق)
-// ============================================================
-function updateProfile() {
-  try {
-    const name = document.getElementById('edit-name');
-    const title = document.getElementById('edit-title');
-    const bio = document.getElementById('edit-bio');
-    if (name) data.name = name.value;
-    if (title) data.title = title.value;
-    if (bio) data.bio = bio.value;
-    saveData();
-    renderAll();
-    alert('✅ تم تحديث البيانات وحفظها!');
-  } catch (e) {
-    alert('حدث خطأ: ' + e.message);
-  }
+.counter-edit-popup .popup-content input {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 30px;
+  border: 1px solid #ddd;
+  font-family: 'Cairo', sans-serif;
+  margin-bottom: 12px;
 }
-
-function updateAvatar() {
-  try {
-    const urlInput = document.getElementById('avatar-url');
-    if (!urlInput) return;
-    const url = urlInput.value.trim();
-    if (url) {
-      data.avatar = url;
-      saveData();
-      renderAll();
-      alert('✅ تم تغيير الصورة وحفظها!');
-    } else {
-      alert('⚠️ يرجى إدخال رابط الصورة');
-    }
-  } catch (e) {
-    alert('حدث خطأ: ' + e.message);
-  }
+.dark .counter-edit-popup .popup-content input {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e2e8f0;
 }
-
-function updateCounters() {
-  try {
-    const keys = ['students', 'experience', 'courses', 'certificates'];
-    keys.forEach(key => {
-      const input = document.getElementById('counter-' + key);
-      if (input) data.counters[key] = parseInt(input.value) || 0;
-    });
-    saveData();
-    renderAll();
-    alert('✅ تم تحديث العدادت وحفظها!');
-  } catch (e) {
-    alert('حدث خطأ: ' + e.message);
-  }
+.counter-edit-popup .popup-content .btn-group {
+  display: flex;
+  gap: 10px;
 }
-
-// Counter Edit Popup
-let currentCounterKey = '';
-
-function openCounterEdit(key) {
-  try {
-    currentCounterKey = key;
-    const popup = document.getElementById('counterEditPopup');
-    const input = document.getElementById('counterEditInput');
-    if (popup) popup.classList.add('open');
-    if (input) input.value = data.counters[key] || 0;
-  } catch (e) {
-    console.log(e);
-  }
+.counter-edit-popup .popup-content .btn-group button {
+  flex: 1;
 }
-
-function closeCounterEdit() {
-  const popup = document.getElementById('counterEditPopup');
-  if (popup) popup.classList.remove('open');
-}
-
-function saveCounterEdit() {
-  try {
-    const input = document.getElementById('counterEditInput');
-    if (!input) return;
-    const value = parseInt(input.value) || 0;
-    if (currentCounterKey && data.counters[currentCounterKey] !== undefined) {
-      data.counters[currentCounterKey] = value;
-      saveData();
-      renderAll();
-      closeCounterEdit();
-      alert('✅ تم تحديث العداد!');
-    }
-  } catch (e) {
-    alert('حدث خطأ: ' + e.message);
-  }
-}
-
-// ============================================================
-// 6. دوال الحسابات
-// ============================================================
-function addAccount() {
-  try {
-    const nameInput = document.getElementById('new-account-name');
-    const urlInput = document.getElementById('new-account-url');
-    const iconInput = document.getElementById('new-account-icon');
-    if (!nameInput) return;
-    
-    const name = nameInput.value.trim();
-    const url = (urlInput ? urlInput.value.trim() : '#') || '#';
-    const icon = (iconInput ? iconInput.value.trim() : 'fas fa-link') || 'fas fa-link';
-    
-    if (!name) { alert('يرجى إدخال اسم المنصة'); return; }
-    
-    let platform = '';
-    if (icon.includes('youtube')) platform = 'youtube';
-    else if (icon.includes('facebook')) platform = 'facebook';
-    else if (icon.includes('tiktok')) platform = 'tiktok';
-    else if (icon.includes('telegram')) platform = 'telegram';
-    else if (icon.includes('instagram')) platform = 'instagram';
-    else if (icon.includes('whatsapp')) platform = 'whatsapp';
-    else if (icon.includes('linkedin')) platform = 'linkedin';
-    else if (icon.includes('twitter')) platform = 'twitter';
-
-    data.accounts.push({ name, url, icon, platform });
-    saveData();
-    renderAccounts();
-    if (nameInput) nameInput.value = '';
-    if (urlInput) urlInput.value = '';
-    if (iconInput) iconInput.value = 'fab fa-youtube';
-    alert('✅ تم إضافة الحساب وحفظه!');
-  } catch (e) {
-    alert('حدث خطأ: ' + e.message);
-  }
-}
-
-function removeAccount(idx) {
-  if (confirm('هل أنت متأكد من حذف هذا الحساب؟')) {
-    data.accounts.splice(idx, 1);
-    saveData();
-    renderAccounts();
-  }
-}
-
-// ============================================================
-// 7. دوال الشهادات
-// ============================================================
-function addCertificate() {
-  try {
-    const nameInput = document.getElementById('new-cert-name');
-    const urlInput = document.getElementById('new-cert-url');
-    if (!nameInput) return;
-    
-    const name = nameInput.value.trim();
-    const url = urlInput ? urlInput.value.trim() : '';
-    
-    if (!name || !url) { alert('يرجى إدخال اسم الشهادة ورابط الصورة'); return; }
-    data.certificates.push({ name, url });
-    saveData();
-    renderCertificates();
-    if (nameInput) nameInput.value = '';
-    if (urlInput) urlInput.value = '';
-    alert('✅ تم إضافة الشهادة وحفظها!');
-  } catch (e) {
-    alert('حدث خطأ: ' + e.message);
-  }
-}
-
-function removeCertificate(idx) {
-  if (confirm('هل أنت متأكد من حذف هذه الشهادة؟')) {
-    data.certificates.splice(idx, 1);
-    saveData();
-    renderCertificates();
-  }
-}
-
-function editCertificate(idx) {
-  try {
-    const cert = data.certificates[idx];
-    const newName = prompt('اسم الشهادة:', cert.name);
-    if (newName !== null && newName.trim()) {
-      cert.name = newName.trim();
-      saveData();
-      renderCertificates();
-      alert('✅ تم تعديل الشهادة!');
-    }
-  } catch (e) {
-    alert('حدث خطأ: ' + e.message);
-  }
-}
-
-// ============================================================
-// 8. دوال معرض الصور
-// ============================================================
-function addGalleryImage() {
-  try {
-    const urlInput = document.getElementById('new-gallery-url');
-    if (!urlInput) return;
-    const url = urlInput.value.trim();
-    if (!url) { alert('يرجى إدخال رابط الصورة'); return; }
-    data.gallery.push(url);
-    saveData();
-    renderGallery();
-    urlInput.value = '';
-    alert('✅ تم إضافة الصورة!');
-  } catch (e) {
-    alert('حدث خطأ: ' + e.message);
-  }
-}
-
-function removeGalleryImage(idx) {
-  if (confirm('هل أنت متأكد من حذف هذه الصورة؟')) {
-    data.gallery.splice(idx, 1);
-    saveData();
-    renderGallery();
-  }
-}
-
-// ============================================================
-// 9. دوال الإنجازات
-// ============================================================
-function addAchievement() {
-  try {
-    const iconInput = document.getElementById('new-achievement-icon');
-    const numberInput = document.getElementById('new-achievement-number');
-    const labelInput = document.getElementById('new-achievement-label');
-    if (!labelInput) return;
-    
-    const icon = (iconInput ? iconInput.value.trim() : 'fa-award') || 'fa-award';
-    const number = parseInt(numberInput ? numberInput.value : 0) || 0;
-    const label = labelInput.value.trim();
-    
-    if (!label) { alert('يرجى إدخال اسم الإنجاز'); return; }
-    data.achievements.push({ icon, number, label });
-    saveData();
-    renderAchievements();
-    if (iconInput) iconInput.value = 'fa-award';
-    if (numberInput) numberInput.value = '';
-    if (labelInput) labelInput.value = '';
-    alert('✅ تم إضافة الإنجاز!');
-  } catch (e) {
-    alert('حدث خطأ: ' + e.message);
-  }
-}
-
-function removeAchievement(idx) {
-  if (confirm('هل أنت متأكد من حذف هذا الإنجاز؟')) {
-    data.achievements.splice(idx, 1);
-    saveData();
-    renderAchievements();
-  }
-}
-
-function editAchievement(idx) {
-  try {
-    const ach = data.achievements[idx];
-    const newLabel = prompt('اسم الإنجاز:', ach.label);
-    if (newLabel !== null && newLabel.trim()) {
-      ach.label = newLabel.trim();
-      const newNumber = prompt('الرقم:', ach.number);
-      if (newNumber !== null) {
-        ach.number = parseInt(newNumber) || 0;
-      }
-      const newIcon = prompt('الأيقونة (مثل: fa-award):', ach.icon);
-      if (newIcon !== null && newIcon.trim()) {
-        ach.icon = newIcon.trim();
-      }
-      saveData();
-      renderAchievements();
-      alert('✅ تم تعديل الإنجاز!');
-    }
-  } catch (e) {
-    alert('حدث خطأ: ' + e.message);
-  }
-}
-
-// ============================================================
-// 10. دوال مساعدة
-// ============================================================
-function openLightbox(src) {
-  try {
-    const existing = document.querySelector('.lightbox-overlay');
-    if (existing) existing.remove();
-    const overlay = document.createElement('div');
-    overlay.className = 'lightbox-overlay';
-    overlay.innerHTML = `<img src="${src}" onerror="this.src='https://via.placeholder.com/600x400/3b82f6/fff?text=صورة'" />`;
-    overlay.onclick = () => overlay.remove();
-    document.body.appendChild(overlay);
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-function toggleFaq(el) {
-  try {
-    const answer = el.nextElementSibling;
-    const icon = el.querySelector('span');
-    if (answer.classList.contains('open')) {
-      answer.classList.remove('open');
-      if (icon) icon.textContent = '+';
-    } else {
-      answer.classList.add('open');
-      if (icon) icon.textContent = '−';
-    }
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-function toggleTheme() {
-  try {
-    document.body.classList.toggle('dark');
-    const icon = document.querySelector('.theme-toggle i');
-    if (icon) {
-      icon.classList.toggle('fa-moon');
-      icon.classList.toggle('fa-sun');
-    }
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-function sendMessage() {
-  alert('✅ تم إرسال رسالتك بنجاح!');
-}
-
-// ============================================================
-// 11. لوحة التحكم والباسورد
-// ============================================================
-let dashboardUnlocked = false;
-
-function openDashboard() {
-  try {
-    if (dashboardUnlocked) {
-      const dashboard = document.getElementById('dashboard');
-      const overlay = document.getElementById('dashboardOverlay');
-      if (dashboard) dashboard.classList.add('open');
-      if (overlay) overlay.classList.add('open');
-    } else {
-      const modal = document.getElementById('passwordModal');
-      const input = document.getElementById('passwordInput');
-      const error = document.getElementById('passwordError');
-      if (modal) modal.classList.add('open');
-      if (input) input.value = '';
-      if (error) error.style.display = 'none';
-      setTimeout(() => { if (input) input.focus(); }, 100);
-    }
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-function closeDashboard() {
-  try {
-    const dashboard = document.getElementById('dashboard');
-    const overlay = document.getElementById('dashboardOverlay');
-    if (dashboard) dashboard.classList.remove('open');
-    if (overlay) overlay.classList.remove('open');
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-function checkPassword() {
-  try {
-    const input = document.getElementById('passwordInput');
-    const error = document.getElementById('passwordError');
-    if (!input) return;
-    
-    if (input.value === '123') {
-      dashboardUnlocked = true;
-      const modal = document.getElementById('passwordModal');
-      if (modal) modal.classList.remove('open');
-      openDashboard();
-    } else {
-      if (error) error.style.display = 'block';
-    }
-  } catch (e) {
-    console.log(e);
-  }
-}
-
-// Enter key for password
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') {
-    const modal = document.getElementById('passwordModal');
-    if (modal && modal.classList.contains('open')) {
-      checkPassword();
-    }
-  }
-});
-
-// ============================================================
-// 12. Scroll Animations & On Load
-// ============================================================
-function setupScrollAnimations() {
-  try {
-    document.querySelectorAll('.fade-up').forEach(el => {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      }, { threshold: 0.2 });
-      observer.observe(el);
-    });
-  } catch (e) {
-    console.log(e);
-  }
-}
-// ============================================================
-// رفع صور الشهادات من الجهاز
-// ============================================================
-let uploadedCertImageData = null;
-
-// إضافة حدث لرفع صورة الشهادة
-document.addEventListener('DOMContentLoaded', function() {
-  const certFileInput = document.getElementById('certFileInput');
-  if (certFileInput) {
-    certFileInput.addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          uploadedCertImageData = event.target.result;
-          const preview = document.getElementById('certPreview');
-          const previewImg = document.getElementById('certPreviewImg');
-          if (preview) preview.style.display = 'block';
-          if (previewImg) previewImg.src = uploadedCertImageData;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  }
-});
-
-function useUploadedCertImage() {
-  if (uploadedCertImageData) {
-    const certUrl = document.getElementById('new-cert-url');
-    if (certUrl) {
-      certUrl.value = uploadedCertImageData;
-      alert('✅ تم إضافة رابط الصورة في حقل الشهادة!');
-    }
-    clearCertUpload();
-  } else {
-    alert('⚠️ يرجى اختيار صورة أولاً');
-  }
-}
-
-function clearCertUpload() {
-  const preview = document.getElementById('certPreview');
-  const fileInput = document.getElementById('certFileInput');
-  if (preview) preview.style.display = 'none';
-  if (fileInput) fileInput.value = '';
-  uploadedCertImageData = null;
-}
-
-// ============================================================
-// دوال رفع الصور العامة (المعدلة)
-// ============================================================
-function useUploadedImageForCert() {
-  if (uploadedImageData) {
-    const certUrl = document.getElementById('new-cert-url');
-    if (certUrl) certUrl.value = uploadedImageData;
-    clearUpload();
-    alert('✅ تم إضافة رابط الصورة في حقل الشهادة!');
-  } else {
-    alert('⚠️ يرجى اختيار صورة أولاً من قسم رفع الصور');
-  }
-}
-// ============================================================
-// 13. تشغيل الموقع
-// ============================================================
-// استخدام DOMContentLoaded بدلاً من window.onload لضمان تحميل DOM أولاً
-document.addEventListener('DOMContentLoaded', function() {
-  try {
-    renderAll();
-    setTimeout(() => {
-      const loading = document.getElementById('loading-screen');
-      if (loading) loading.classList.add('hide');
-      setupScrollAnimations();
-    }, 500);
-  } catch (e) {
-    console.log('خطأ في التحميل:', e);
-    // إخفاء شاشة التحميل حتى لو في خطأ
-    const loading = document.getElementById('loading-screen');
-    if (loading) loading.classList.add('hide');
-  }
-});
-
-// تأكد من إخفاء شاشة التحميل بعد 3 ثواني كحد أقصى
-setTimeout(() => {
-  const loading = document.getElementById('loading-screen');
-  if (loading) loading.classList.add('hide');
-}, 3000);
