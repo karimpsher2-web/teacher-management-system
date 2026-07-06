@@ -702,7 +702,66 @@ function setupScrollAnimations() {
     console.log(e);
   }
 }
+// ============================================================
+// رفع صور الشهادات من الجهاز
+// ============================================================
+let uploadedCertImageData = null;
 
+// إضافة حدث لرفع صورة الشهادة
+document.addEventListener('DOMContentLoaded', function() {
+  const certFileInput = document.getElementById('certFileInput');
+  if (certFileInput) {
+    certFileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          uploadedCertImageData = event.target.result;
+          const preview = document.getElementById('certPreview');
+          const previewImg = document.getElementById('certPreviewImg');
+          if (preview) preview.style.display = 'block';
+          if (previewImg) previewImg.src = uploadedCertImageData;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+});
+
+function useUploadedCertImage() {
+  if (uploadedCertImageData) {
+    const certUrl = document.getElementById('new-cert-url');
+    if (certUrl) {
+      certUrl.value = uploadedCertImageData;
+      alert('✅ تم إضافة رابط الصورة في حقل الشهادة!');
+    }
+    clearCertUpload();
+  } else {
+    alert('⚠️ يرجى اختيار صورة أولاً');
+  }
+}
+
+function clearCertUpload() {
+  const preview = document.getElementById('certPreview');
+  const fileInput = document.getElementById('certFileInput');
+  if (preview) preview.style.display = 'none';
+  if (fileInput) fileInput.value = '';
+  uploadedCertImageData = null;
+}
+
+// ============================================================
+// دوال رفع الصور العامة (المعدلة)
+// ============================================================
+function useUploadedImageForCert() {
+  if (uploadedImageData) {
+    const certUrl = document.getElementById('new-cert-url');
+    if (certUrl) certUrl.value = uploadedImageData;
+    clearUpload();
+    alert('✅ تم إضافة رابط الصورة في حقل الشهادة!');
+  } else {
+    alert('⚠️ يرجى اختيار صورة أولاً من قسم رفع الصور');
+  }
+}
 // ============================================================
 // 13. تشغيل الموقع
 // ============================================================
