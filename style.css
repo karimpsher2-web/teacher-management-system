@@ -845,32 +845,6 @@ section {
   margin-left: 4px;
 }
 
-/* File Upload */
-.upload-area {
-  border: 2px dashed #3b82f6;
-  border-radius: 16px;
-  padding: 16px;
-  text-align: center;
-  margin: 10px 0;
-  background: rgba(59, 130, 246, 0.05);
-}
-.upload-area input[type="file"] {
-  width: 100%;
-  padding: 8px;
-  border: none;
-  background: transparent;
-}
-.upload-preview {
-  margin: 10px 0;
-  display: none;
-}
-.upload-preview img {
-  max-width: 100%;
-  max-height: 150px;
-  border-radius: 12px;
-  border: 2px solid #3b82f6;
-}
-
 /* Password Modal */
 .password-modal {
   position: fixed;
@@ -1052,16 +1026,4 @@ section {
 }
 .counter-edit-popup .popup-content .btn-group button {
   flex: 1;
-}
-/* رفع صور الشهادات */
-#certPreview {
-  margin: 10px 0;
-  display: none;
-  text-align: center;
-}
-#certPreview img {
-  max-width: 100%;
-  max-height: 150px;
-  border-radius: 12px;
-  border: 2px solid #22c55e;
 }
