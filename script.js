@@ -1,24 +1,13 @@
 // ============================================================
-// 1. تحميل البيانات من localStorage أو استخدام البيانات الافتراضية
+// 1. تحميل البيانات
 // ============================================================
-function loadData() {
-  const saved = localStorage.getItem('teacherData');
-  if (saved) {
-    try {
-      return JSON.parse(saved);
-    } catch (e) {
-      return getDefaultData();
-    }
-  }
-  return getDefaultData();
-}
-
 function getDefaultData() {
   return {
     name: 'مستر كريم',
     title: 'معلم العلوم والعلوم المتكاملة - عام ولغات',
     bio: 'ابتدائي - إعدادي - ثانوي',
     avatar: 'https://i.pravatar.cc/300?img=12',
+    counters: { students: 1250, experience: 4, courses: 24, certificates: 12 },
     accounts: [
       { name: 'يوتيوب', url: '#', icon: 'fab fa-youtube', platform: 'youtube' },
       { name: 'فيسبوك', url: 'https://www.facebook.com/share/1DnNff9zJm/', icon: 'fab fa-facebook',
@@ -38,28 +27,38 @@ function getDefaultData() {
       { name: 'Microsoft Office 2019', url: 'https://via.placeholder.com/300x200/ef4444/fff?text=Office' },
       { name: 'شهادة شكر', url: 'https://via.placeholder.com/300x200/8b5cf6/fff?text=%D8%B4%D9%83%D8%B1' },
       { name: 'AI & Cyber Security', url: 'https://via.placeholder.com/300x200/06b6d4/fff?text=AI' },
-      { name: 'Marketing', url: 'https://via.placeholder.com/300x200/f97316/fff?text=Marketing' },
-      { name: 'English Workshop', url: 'https://via.placeholder.com/300x200/14b8a6/fff?text=English' },
-      { name: 'Leadership Skills', url: 'https://via.placeholder.com/300x200/6366f1/fff?text=Leadership' },
-      { name: 'How to be HR', url: 'https://via.placeholder.com/300x200/8b5cf6/fff?text=HR' },
-      { name: 'Soft Skills', url: 'https://via.placeholder.com/300x200/ec4899/fff?text=Soft+Skills' },
-      { name: 'Core Career Skills', url: 'https://via.placeholder.com/300x200/3b82f6/fff?text=Career' }
+      { name: 'Marketing', url: 'https://via.placeholder.com/300x200/f97316/fff?text=Marketing' }
     ],
     gallery: [
       'https://picsum.photos/seed/teach1/400/300',
       'https://picsum.photos/seed/teach2/400/300',
       'https://picsum.photos/seed/teach3/400/300',
-      'https://picsum.photos/seed/teach4/400/300',
-      'https://picsum.photos/seed/teach5/400/300',
-      'https://picsum.photos/seed/teach6/400/300'
+      'https://picsum.photos/seed/teach4/400/300'
+    ],
+    achievements: [
+      { icon: 'fa-award', number: 12, label: 'جوائز' },
+      { icon: 'fa-users', number: 300, label: 'طلاب متميزون' },
+      { icon: 'fa-book-open', number: 15, label: 'كتب منشورة' }
     ]
   };
+}
+
+function loadData() {
+  const saved = localStorage.getItem('teacherData');
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch (e) {
+      return getDefaultData();
+    }
+  }
+  return getDefaultData();
 }
 
 let data = loadData();
 
 // ============================================================
-// 2. حفظ البيانات في localStorage
+// 2. حفظ البيانات
 // ============================================================
 function saveData() {
   localStorage.setItem('teacherData', JSON.stringify(data));
@@ -109,6 +108,14 @@ function useUploadedImageForCert() {
   }
 }
 
+function useUploadedImageForGallery() {
+  if (uploadedImageData) {
+    document.getElementById('new-gallery-url').value = uploadedImageData;
+    clearUpload();
+    alert('✅ تم إضافة رابط الصورة في حقل معرض الصور!');
+  }
+}
+
 function clearUpload() {
   document.getElementById('uploadPreview').style.display = 'none';
   document.getElementById('fileInput').value = '';
@@ -131,12 +138,24 @@ function renderAll() {
   document.getElementById('edit-bio').value = data.bio;
   document.getElementById('avatar-url').value = data.avatar;
 
+  // Counters
+  document.getElementById('counter-students').value = data.counters.students;
+  document.getElementById('counter-experience').value = data.counters.experience;
+  document.getElementById('counter-courses').value = data.counters.courses;
+  document.getElementById('counter-certificates').value = data.counters.certificates;
+  document.getElementById('counter-students-display').textContent = data.counters.students;
+  document.getElementById('counter-experience-display').textContent = data.counters.experience;
+  document.getElementById('counter-courses-display').textContent = data.counters.courses;
+  document.getElementById('counter-certificates-display').textContent = data.counters.certificates;
+
   // Accounts
   renderAccounts();
   // Certificates
   renderCertificates();
   // Gallery
   renderGallery();
+  // Achievements
+  renderAchievements();
 }
 
 function renderAccounts() {
@@ -154,7 +173,9 @@ function renderAccounts() {
   list.innerHTML = data.accounts.map((acc, idx) => `
         <div class="list-item">
           <span class="item-name"><i class="${acc.icon}"></i> ${acc.name}</span>
-          <button class="btn-danger" onclick="removeAccount(${idx})">حذف</button>
+          <div>
+            <button class="btn-danger" onclick="removeAccount(${idx})">حذف</button>
+          </div>
         </div>
       `).join('');
 }
@@ -172,15 +193,51 @@ function renderCertificates() {
   list.innerHTML = data.certificates.map((cert, idx) => `
         <div class="list-item">
           <span class="item-name">📜 ${cert.name}</span>
-          <button class="btn-danger" onclick="removeCertificate(${idx})">حذف</button>
+          <div>
+            <button class="btn-warning" onclick="editCertificate(${idx})">تعديل</button>
+            <button class="btn-danger" onclick="removeCertificate(${idx})">حذف</button>
+          </div>
         </div>
       `).join('');
 }
 
 function renderGallery() {
-  const container = document.getElementById('gallery-grid');
-  container.innerHTML = data.gallery.map(img => `
-        <img src="${img}" onclick="openLightbox('${img}')" onerror="this.src='https://via.placeholder.com/400x300/3b82f6/fff?text=صورة'" />
+  const container = document.getElementById('gallery-container');
+  container.innerHTML = data.gallery.map((img, idx) => `
+        <div class="gallery-item-wrapper">
+          <img src="${img}" onclick="openLightbox('${img}')" onerror="this.src='https://via.placeholder.com/400x300/3b82f6/fff?text=صورة'" />
+          <button class="gallery-delete-btn" onclick="event.stopPropagation();removeGalleryImage(${idx})"><i class="fas fa-trash"></i></button>
+        </div>
+      `).join('');
+
+  const list = document.getElementById('gallery-list');
+  list.innerHTML = data.gallery.map((img, idx) => `
+        <div class="list-item">
+          <span class="item-name">🖼️ صورة ${idx + 1}</span>
+          <button class="btn-danger" onclick="removeGalleryImage(${idx})">حذف</button>
+        </div>
+      `).join('');
+}
+
+function renderAchievements() {
+  const container = document.getElementById('achievements-container');
+  container.innerHTML = data.achievements.map((ach) => `
+        <div class="achievement-card">
+          <div class="icon"><i class="fas ${ach.icon}"></i></div>
+          <div class="number">${ach.number}</div>
+          <div class="label">${ach.label}</div>
+        </div>
+      `).join('');
+
+  const list = document.getElementById('achievement-list');
+  list.innerHTML = data.achievements.map((ach, idx) => `
+        <div class="list-item">
+          <span class="item-name"><i class="fas ${ach.icon}"></i> ${ach.label} (${ach.number})</span>
+          <div>
+            <button class="btn-warning" onclick="editAchievement(${idx})">تعديل</button>
+            <button class="btn-danger" onclick="removeAchievement(${idx})">حذف</button>
+          </div>
+        </div>
       `).join('');
 }
 
@@ -208,6 +265,45 @@ function updateAvatar() {
   }
 }
 
+function updateCounters() {
+  data.counters.students = parseInt(document.getElementById('counter-students').value) || 0;
+  data.counters.experience = parseInt(document.getElementById('counter-experience').value) || 0;
+  data.counters.courses = parseInt(document.getElementById('counter-courses').value) || 0;
+  data.counters.certificates = parseInt(document.getElementById('counter-certificates').value) || 0;
+  saveData();
+  renderAll();
+  alert('✅ تم تحديث العدادت وحفظها!');
+}
+
+// Counter Edit Popup
+let currentCounterKey = '';
+
+function openCounterEdit(key) {
+  currentCounterKey = key;
+  const popup = document.getElementById('counterEditPopup');
+  const input = document.getElementById('counterEditInput');
+  input.value = data.counters[key] || 0;
+  popup.classList.add('open');
+}
+
+function closeCounterEdit() {
+  document.getElementById('counterEditPopup').classList.remove('open');
+}
+
+function saveCounterEdit() {
+  const value = parseInt(document.getElementById('counterEditInput').value) || 0;
+  if (currentCounterKey && data.counters[currentCounterKey] !== undefined) {
+    data.counters[currentCounterKey] = value;
+    saveData();
+    renderAll();
+    closeCounterEdit();
+    alert('✅ تم تحديث العداد!');
+  }
+}
+
+// ============================================================
+// 6. دوال الحسابات
+// ============================================================
 function addAccount() {
   const name = document.getElementById('new-account-name').value.trim();
   const url = document.getElementById('new-account-url').value.trim() || '#';
@@ -240,6 +336,9 @@ function removeAccount(idx) {
   }
 }
 
+// ============================================================
+// 7. دوال الشهادات
+// ============================================================
 function addCertificate() {
   const name = document.getElementById('new-cert-name').value.trim();
   const url = document.getElementById('new-cert-url').value.trim();
@@ -260,8 +359,84 @@ function removeCertificate(idx) {
   }
 }
 
+function editCertificate(idx) {
+  const cert = data.certificates[idx];
+  const newName = prompt('اسم الشهادة:', cert.name);
+  if (newName !== null && newName.trim()) {
+    cert.name = newName.trim();
+    saveData();
+    renderCertificates();
+    alert('✅ تم تعديل الشهادة!');
+  }
+}
+
 // ============================================================
-// 6. دوال مساعدة
+// 8. دوال معرض الصور
+// ============================================================
+function addGalleryImage() {
+  const url = document.getElementById('new-gallery-url').value.trim();
+  if (!url) { alert('يرجى إدخال رابط الصورة'); return; }
+  data.gallery.push(url);
+  saveData();
+  renderGallery();
+  document.getElementById('new-gallery-url').value = '';
+  alert('✅ تم إضافة الصورة!');
+}
+
+function removeGalleryImage(idx) {
+  if (confirm('هل أنت متأكد من حذف هذه الصورة؟')) {
+    data.gallery.splice(idx, 1);
+    saveData();
+    renderGallery();
+  }
+}
+
+// ============================================================
+// 9. دوال الإنجازات
+// ============================================================
+function addAchievement() {
+  const icon = document.getElementById('new-achievement-icon').value.trim() || 'fa-award';
+  const number = parseInt(document.getElementById('new-achievement-number').value) || 0;
+  const label = document.getElementById('new-achievement-label').value.trim();
+  if (!label) { alert('يرجى إدخال اسم الإنجاز'); return; }
+  data.achievements.push({ icon, number, label });
+  saveData();
+  renderAchievements();
+  document.getElementById('new-achievement-icon').value = 'fa-award';
+  document.getElementById('new-achievement-number').value = '';
+  document.getElementById('new-achievement-label').value = '';
+  alert('✅ تم إضافة الإنجاز!');
+}
+
+function removeAchievement(idx) {
+  if (confirm('هل أنت متأكد من حذف هذا الإنجاز؟')) {
+    data.achievements.splice(idx, 1);
+    saveData();
+    renderAchievements();
+  }
+}
+
+function editAchievement(idx) {
+  const ach = data.achievements[idx];
+  const newLabel = prompt('اسم الإنجاز:', ach.label);
+  if (newLabel !== null && newLabel.trim()) {
+    ach.label = newLabel.trim();
+    const newNumber = prompt('الرقم:', ach.number);
+    if (newNumber !== null) {
+      ach.number = parseInt(newNumber) || 0;
+    }
+    const newIcon = prompt('الأيقونة (مثل: fa-award):', ach.icon);
+    if (newIcon !== null && newIcon.trim()) {
+      ach.icon = newIcon.trim();
+    }
+    saveData();
+    renderAchievements();
+    alert('✅ تم تعديل الإنجاز!');
+  }
+}
+
+// ============================================================
+// 10. دوال مساعدة
 // ============================================================
 function openLightbox(src) {
   const existing = document.querySelector('.lightbox-overlay');
@@ -298,7 +473,7 @@ function sendMessage() {
 }
 
 // ============================================================
-// 7. لوحة التحكم والباسورد
+// 11. لوحة التحكم والباسورد
 // ============================================================
 let dashboardUnlocked = false;
 
@@ -340,27 +515,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 // ============================================================
-// 8. Counters Animation
-// ============================================================
-function animateCounters() {
-  document.querySelectorAll('.number[data-count]').forEach(counter => {
-    const target = parseInt(counter.dataset.count);
-    let current = 0;
-    const increment = Math.ceil(target / 40);
-    const interval = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        counter.textContent = target;
-        clearInterval(interval);
-      } else {
-        counter.textContent = current;
-      }
-    }, 30);
-  });
-}
-
-// ============================================================
-// 9. Scroll Animations
+// 12. Scroll Animations & On Load
 // ============================================================
 function setupScrollAnimations() {
   document.querySelectorAll('.fade-up').forEach(el => {
@@ -375,14 +530,10 @@ function setupScrollAnimations() {
   });
 }
 
-// ============================================================
-// 10. On Load
-// ============================================================
 window.onload = function() {
   renderAll();
   setTimeout(() => {
     document.getElementById('loading-screen').classList.add('hide');
-    animateCounters();
     setupScrollAnimations();
   }, 500);
 };
