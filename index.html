@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
-    /* ====== كل الستايلات زي ما هي ====== */
+    /* ====== كل الستايلات ====== */
     * {
       margin: 0;
       padding: 0;
@@ -119,6 +119,20 @@
     }
     .btn-danger:hover {
       background: #dc2626;
+    }
+    .btn-success {
+      background: #22c55e;
+      color: #fff;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 0.8rem;
+    }
+    .btn-success:hover {
+      background: #16a34a;
     }
 
     /* Navbar */
@@ -285,7 +299,7 @@
       border-radius: 4px;
     }
 
-    /* Accounts - Platform Colors */
+    /* Accounts */
     .accounts-grid,
     .certificates-grid,
     .achievements-grid,
@@ -544,7 +558,7 @@
       border-radius: 24px;
     }
 
-    /* Social Links in Contact */
+    /* Social Links */
     .social-links-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -671,7 +685,7 @@
       position: fixed;
       left: -420px;
       top: 0;
-      width: 400px;
+      width: 420px;
       height: 100vh;
       background: #f8fafc;
       box-shadow: 4px 0 40px rgba(0, 0, 0, 0.2);
@@ -701,6 +715,12 @@
     }
     .dashboard-panel .control-group {
       margin-bottom: 28px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 16px;
+      border-radius: 16px;
+    }
+    .dark .dashboard-panel .control-group {
+      background: rgba(255, 255, 255, 0.03);
     }
     .dashboard-panel label {
       display: block;
@@ -746,6 +766,8 @@
     }
     .dashboard-panel .item-list {
       margin-top: 8px;
+      max-height: 150px;
+      overflow-y: auto;
     }
     .dashboard-panel .item-list .list-item {
       display: flex;
@@ -760,11 +782,38 @@
       background: rgba(255, 255, 255, 0.05);
     }
     .dashboard-panel .item-list .list-item .item-name {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      word-break: break-all;
     }
     .dashboard-panel .item-list .list-item .btn-danger {
       padding: 4px 12px;
       font-size: 0.7rem;
+    }
+
+    /* File Upload */
+    .upload-area {
+      border: 2px dashed #3b82f6;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+      margin: 10px 0;
+      background: rgba(59, 130, 246, 0.05);
+    }
+    .upload-area input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      background: transparent;
+    }
+    .upload-preview {
+      margin: 10px 0;
+      display: none;
+    }
+    .upload-preview img {
+      max-width: 100%;
+      max-height: 150px;
+      border-radius: 12px;
+      border: 2px solid #3b82f6;
     }
 
     /* Password Modal */
@@ -812,25 +861,6 @@
       font-size: 0.9rem;
       margin-bottom: 12px;
       display: none;
-    }
-
-    /* Image Upload Helper */
-    .upload-helper {
-      background: rgba(59, 130, 246, 0.1);
-      border: 2px dashed #3b82f6;
-      border-radius: 16px;
-      padding: 16px;
-      margin: 12px 0;
-      text-align: center;
-    }
-    .upload-helper p {
-      font-size: 0.85rem;
-      opacity: 0.8;
-    }
-    .upload-helper .steps {
-      text-align: right;
-      padding-right: 20px;
-      font-size: 0.8rem;
     }
 
     /* Lightbox */
@@ -893,7 +923,6 @@
       transform: translateY(0);
     }
 
-    /* Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
     }
@@ -908,6 +937,21 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #2563eb;
     }
+
+    .save-notice {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #22c55e;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      z-index: 999;
+      display: none;
+      box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
+    }
   </style>
 </head>
 <body>
@@ -916,6 +960,9 @@
     <div class="loader"></div>
     <div class="loader-text">جاري التحميل...</div>
   </div>
+
+  <!-- Save Notice -->
+  <div id="saveNotice" class="save-notice">✅ تم الحفظ بنجاح!</div>
 
   <!-- Password Modal -->
   <div id="passwordModal" class="password-modal">
@@ -937,21 +984,19 @@
       <button class="close-dashboard" onclick="closeDashboard()">✕</button>
     </h3>
 
-    <!-- ====== إضافة صور من الملفات المحلية ====== -->
-    <div class="control-group" style="background: rgba(59,130,246,0.08); padding:16px; border-radius:16px; margin-bottom:20px;">
+    <!-- رفع الصور من الجهاز -->
+    <div class="control-group" style="border:2px solid #3b82f6;">
       <h4 style="color:#3b82f6;">📤 رفع صور من جهازك</h4>
-      <div class="upload-helper">
-        <p><i class="fas fa-info-circle"></i> اختر صورة من جهازك وستظهر تلقائياً</p>
-        <input type="file" id="fileInput" accept="image/*" style="margin:12px 0; padding:8px; border:1px solid #ddd; border-radius:12px; width:100%;" />
-        <div id="imagePreview" style="margin:10px 0; display:none;">
-          <img id="previewImg" style="max-width:100%; max-height:150px; border-radius:12px; border:2px solid #3b82f6;" />
-          <br>
-          <button class="btn-primary btn-sm" onclick="useUploadedImage()" style="margin-top:8px; padding:8px 20px; font-size:0.8rem;">
-            <i class="fas fa-check"></i> استخدام هذه الصورة
-          </button>
-          <button class="btn-secondary btn-sm" onclick="clearUpload()" style="margin-top:8px; padding:8px 20px; font-size:0.8rem;">
-            إلغاء
-          </button>
+      <div class="upload-area">
+        <p><i class="fas fa-info-circle"></i> اختر صورة من جهازك</p>
+        <input type="file" id="fileInput" accept="image/*" />
+        <div class="upload-preview" id="uploadPreview">
+          <img id="previewImg" />
+          <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+            <button class="btn-success btn-sm" onclick="useUploadedImage()"><i class="fas fa-user"></i> صورة شخصية</button>
+            <button class="btn-primary btn-sm" onclick="useUploadedImageForCert()"><i class="fas fa-certificate"></i> شهادة</button>
+            <button class="btn-secondary btn-sm" onclick="clearUpload()">إلغاء</button>
+          </div>
         </div>
       </div>
     </div>
@@ -959,18 +1004,17 @@
     <div class="control-group">
       <h4>📝 البيانات الشخصية</h4>
       <label>الاسم</label>
-      <input id="edit-name" value="مستر كريم" />
+      <input id="edit-name" />
       <label>المهنة</label>
-      <input id="edit-title" value="معلم العلوم والعلوم المتكاملة - عام ولغات" />
+      <input id="edit-title" />
       <label>المراحل</label>
-      <input id="edit-bio" value="ابتدائي - إعدادي - ثانوي" />
+      <input id="edit-bio" />
       <button class="btn-primary" onclick="updateProfile()">تحديث</button>
     </div>
 
     <div class="control-group">
       <h4>🖼️ تغيير الصورة الشخصية</h4>
-      <label>رابط الصورة (أو استخدم الرفع أعلاه)</label>
-      <input id="avatar-url" placeholder="رابط الصورة الجديدة" value="https://i.pravatar.cc/300?img=12" />
+      <input id="avatar-url" placeholder="رابط الصورة" />
       <button class="btn-primary" onclick="updateAvatar()">تغيير الصورة</button>
     </div>
 
@@ -978,7 +1022,7 @@
       <h4>📱 إدارة الحسابات</h4>
       <input id="new-account-name" placeholder="اسم المنصة" />
       <input id="new-account-url" placeholder="رابط الزيارة" />
-      <input id="new-account-icon" placeholder="أيقونة (مثل: fab fa-youtube)" value="fab fa-youtube" />
+      <input id="new-account-icon" placeholder="أيقونة" value="fab fa-youtube" />
       <button class="btn-primary" onclick="addAccount()">إضافة حساب</button>
       <div id="account-list" class="item-list"></div>
     </div>
@@ -986,13 +1030,13 @@
     <div class="control-group">
       <h4>📜 إدارة الشهادات</h4>
       <input id="new-cert-name" placeholder="اسم الشهادة" />
-      <input id="new-cert-url" placeholder="رابط الصورة (أو استخدم الرفع أعلاه)" />
+      <input id="new-cert-url" placeholder="رابط الصورة" />
       <button class="btn-primary" onclick="addCertificate()">إضافة شهادة</button>
       <div id="cert-list" class="item-list"></div>
     </div>
 
-    <div style="margin-top:20px;font-size:0.8rem;opacity:0.6;">
-      <i class="fas fa-info-circle"></i> التعديلات فورية على الصفحة
+    <div style="font-size:0.8rem;opacity:0.6;text-align:center;">
+      <i class="fas fa-save"></i> كل التعديلات تتحفظ تلقائياً
     </div>
   </div>
 
@@ -1001,7 +1045,7 @@
   <!-- Main -->
   <div class="container">
     <nav class="navbar">
-      <div class="logo" id="site-logo">منصة المعلم</div>
+      <div class="logo">منصة المعلم</div>
       <div class="nav-actions">
         <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
       </div>
@@ -1010,11 +1054,11 @@
     <!-- Hero -->
     <section class="hero fade-up">
       <div class="hero-avatar">
-        <img id="profile-avatar" src="https://i.pravatar.cc/300?img=12" alt="المعلم مستر كريم" />
+        <img id="profile-avatar" alt="المعلم" />
       </div>
       <div class="hero-content">
         <h1 id="display-name">مستر كريم</h1>
-        <div class="title" id="display-title">معلم العلوم والعلوم المتكاملة - عام ولغات</div>
+        <div class="title" id="display-title">معلم العلوم والعلوم المتكاملة</div>
         <p class="bio" id="display-bio">ابتدائي - إعدادي - ثانوي</p>
         <div class="hero-buttons">
           <a href="#contact" class="btn-primary">تواصل معي</a>
@@ -1025,46 +1069,18 @@
 
     <!-- Features -->
     <div class="features-grid fade-up">
-      <div class="feature-item">
-        <div class="icon"><i class="fas fa-chalkboard-teacher"></i></div>
-        <h4>شرح مبسط</h4>
-        <p>وفهم عميق</p>
-      </div>
-      <div class="feature-item">
-        <div class="icon"><i class="fas fa-brain"></i></div>
-        <h4>تنمية التفكير</h4>
-        <p>والتحليل</p>
-      </div>
-      <div class="feature-item">
-        <div class="icon"><i class="fas fa-sync-alt"></i></div>
-        <h4>متابعة مستمرة</h4>
-        <p>ودعم دائم</p>
-      </div>
-      <div class="feature-item">
-        <div class="icon"><i class="fas fa-heart"></i></div>
-        <h4>شكر</h4>
-        <p>وفهم عميق</p>
-      </div>
+      <div class="feature-item"><div class="icon"><i class="fas fa-chalkboard-teacher"></i></div><h4>شرح مبسط</h4><p>وفهم عميق</p></div>
+      <div class="feature-item"><div class="icon"><i class="fas fa-brain"></i></div><h4>تنمية التفكير</h4><p>والتحليل</p></div>
+      <div class="feature-item"><div class="icon"><i class="fas fa-sync-alt"></i></div><h4>متابعة مستمرة</h4><p>ودعم دائم</p></div>
+      <div class="feature-item"><div class="icon"><i class="fas fa-heart"></i></div><h4>شكر</h4><p>وفهم عميق</p></div>
     </div>
 
     <!-- Counters -->
     <div class="counters fade-up">
-      <div class="counter-item">
-        <div class="number" data-count="1250">0</div>
-        <div class="label">طلاب</div>
-      </div>
-      <div class="counter-item">
-        <div class="number" data-count="8">0</div>
-        <div class="label">سنوات خبرة</div>
-      </div>
-      <div class="counter-item">
-        <div class="number" data-count="24">0</div>
-        <div class="label">دورات</div>
-      </div>
-      <div class="counter-item">
-        <div class="number" data-count="13">0</div>
-        <div class="label">شهادات</div>
-      </div>
+      <div class="counter-item"><div class="number" data-count="1250">0</div><div class="label">طلاب</div></div>
+      <div class="counter-item"><div class="number" data-count="8">0</div><div class="label">سنوات خبرة</div></div>
+      <div class="counter-item"><div class="number" data-count="24">0</div><div class="label">دورات</div></div>
+      <div class="counter-item"><div class="number" data-count="13">0</div><div class="label">شهادات</div></div>
     </div>
 
     <!-- Accounts -->
@@ -1083,21 +1099,9 @@
     <section id="achievements" class="fade-up">
       <h2 class="section-title">الإنجازات</h2>
       <div class="achievements-grid">
-        <div class="achievement-card">
-          <div class="icon"><i class="fas fa-award"></i></div>
-          <div class="number" data-count="12">0</div>
-          <div class="label">جوائز</div>
-        </div>
-        <div class="achievement-card">
-          <div class="icon"><i class="fas fa-users"></i></div>
-          <div class="number" data-count="300">0</div>
-          <div class="label">طلاب متميزون</div>
-        </div>
-        <div class="achievement-card">
-          <div class="icon"><i class="fas fa-book-open"></i></div>
-          <div class="number" data-count="15">0</div>
-          <div class="label">كتب منشورة</div>
-        </div>
+        <div class="achievement-card"><div class="icon"><i class="fas fa-award"></i></div><div class="number" data-count="12">0</div><div class="label">جوائز</div></div>
+        <div class="achievement-card"><div class="icon"><i class="fas fa-users"></i></div><div class="number" data-count="300">0</div><div class="label">طلاب متميزون</div></div>
+        <div class="achievement-card"><div class="icon"><i class="fas fa-book-open"></i></div><div class="number" data-count="15">0</div><div class="label">كتب منشورة</div></div>
       </div>
     </section>
 
@@ -1111,39 +1115,18 @@
     <section id="testimonials" class="fade-up">
       <h2 class="section-title">آراء الطلاب</h2>
       <div class="testimonial-slider">
-        <div class="testimonial-item">
-          <div class="stars">★★★★★</div>
-          <p>أفضل معلم على الإطلاق! أسلوب رائع.</p>
-          <div class="student-name"><img src="https://i.pravatar.cc/60?img=1" /> أحمد خالد</div>
-        </div>
-        <div class="testimonial-item">
-          <div class="stars">★★★★☆</div>
-          <p>شرح مبسط ومفهوم، شكراً لك.</p>
-          <div class="student-name"><img src="https://i.pravatar.cc/60?img=2" /> نورا سامي</div>
-        </div>
-        <div class="testimonial-item">
-          <div class="stars">★★★★★</div>
-          <p>متميز في توصيل المعلومة.</p>
-          <div class="student-name"><img src="https://i.pravatar.cc/60?img=3" /> يوسف عماد</div>
-        </div>
+        <div class="testimonial-item"><div class="stars">★★★★★</div><p>أفضل معلم على الإطلاق!</p><div class="student-name"><img src="https://i.pravatar.cc/60?img=1" /> أحمد خالد</div></div>
+        <div class="testimonial-item"><div class="stars">★★★★☆</div><p>شرح مبسط ومفهوم.</p><div class="student-name"><img src="https://i.pravatar.cc/60?img=2" /> نورا سامي</div></div>
+        <div class="testimonial-item"><div class="stars">★★★★★</div><p>متميز في توصيل المعلومة.</p><div class="student-name"><img src="https://i.pravatar.cc/60?img=3" /> يوسف عماد</div></div>
       </div>
     </section>
 
     <!-- FAQ -->
     <section id="faq" class="fade-up">
       <h2 class="section-title">الأسئلة الشائعة</h2>
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">ما هي المواد التي تدرسها؟ <span>+</span></div>
-        <div class="faq-answer">أدرس العلوم والعلوم المتكاملة لجميع المراحل (ابتدائي، إعدادي، ثانوي).</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">هل تقدم دروساً خصوصية؟ <span>+</span></div>
-        <div class="faq-answer">نعم، يمكن التواصل للحصول على دروس خصوصية.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-question" onclick="toggleFaq(this)">كيف يمكنني الحصول على محتوى إضافي؟ <span>+</span></div>
-        <div class="faq-answer">يوجد محتوى حصري عبر الحسابات على منصات التواصل.</div>
-      </div>
+      <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)">ما هي المواد التي تدرسها؟ <span>+</span></div><div class="faq-answer">أدرس العلوم والعلوم المتكاملة لجميع المراحل.</div></div>
+      <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)">هل تقدم دروساً خصوصية؟ <span>+</span></div><div class="faq-answer">نعم، يمكن التواصل للحصول على دروس خصوصية.</div></div>
+      <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this)">كيف أتواصل معك؟ <span>+</span></div><div class="faq-answer">عبر الحسابات أو نموذج التواصل في الموقع.</div></div>
     </section>
 
     <!-- Contact -->
@@ -1153,36 +1136,17 @@
         <div class="contact-info">
           <p><i class="fas fa-envelope"></i> karim.wael@teacher.com</p>
           <p><i class="fas fa-phone"></i> <a href="tel:+201060949401" style="text-decoration:none;color:inherit;">01060949401</a></p>
-          <p><i class="fas fa-map-marker-alt"></i> المنصورة، جمهورية مصر العربية</p>
-
-          <!-- Social Links -->
+          <p><i class="fas fa-map-marker-alt"></i> المنصورة، مصر</p>
           <div class="social-links-grid">
-            <a href="https://www.instagram.com/karim_psher" target="_blank" class="social-link-item instagram">
-              <i class="fab fa-instagram"></i> إنستجرام
-            </a>
-            <a href="https://www.facebook.com/share/1DnNff9zJm/" target="_blank" class="social-link-item facebook">
-              <i class="fab fa-facebook"></i> فيسبوك
-            </a>
-            <a href="https://wa.me/201060949401" target="_blank" class="social-link-item whatsapp">
-              <i class="fab fa-whatsapp"></i> واتساب
-            </a>
-            <a href="#" target="_blank" class="social-link-item youtube">
-              <i class="fab fa-youtube"></i> يوتيوب
-            </a>
-            <a href="#" target="_blank" class="social-link-item tiktok">
-              <i class="fab fa-tiktok"></i> تيك توك
-            </a>
-            <a href="#" target="_blank" class="social-link-item telegram">
-              <i class="fab fa-telegram"></i> تيليجرام
-            </a>
-            <a href="#" target="_blank" class="social-link-item linkedin">
-              <i class="fab fa-linkedin"></i> لينكدإن
-            </a>
-            <a href="#" target="_blank" class="social-link-item twitter">
-              <i class="fab fa-twitter"></i> تويتر
-            </a>
+            <a href="https://www.instagram.com/karim_psher" target="_blank" class="social-link-item instagram"><i class="fab fa-instagram"></i> إنستجرام</a>
+            <a href="https://www.facebook.com/share/1DnNff9zJm/" target="_blank" class="social-link-item facebook"><i class="fab fa-facebook"></i> فيسبوك</a>
+            <a href="https://wa.me/201060949401" target="_blank" class="social-link-item whatsapp"><i class="fab fa-whatsapp"></i> واتساب</a>
+            <a href="#" target="_blank" class="social-link-item youtube"><i class="fab fa-youtube"></i> يوتيوب</a>
+            <a href="#" target="_blank" class="social-link-item tiktok"><i class="fab fa-tiktok"></i> تيك توك</a>
+            <a href="#" target="_blank" class="social-link-item telegram"><i class="fab fa-telegram"></i> تيليجرام</a>
+            <a href="#" target="_blank" class="social-link-item linkedin"><i class="fab fa-linkedin"></i> لينكدإن</a>
+            <a href="#" target="_blank" class="social-link-item twitter"><i class="fab fa-twitter"></i> تويتر</a>
           </div>
-
           <div style="margin-top:16px;border-radius:16px;overflow:hidden;height:160px;background:#e2e8f0;">
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3418.123456!2d31.4!3d31.05!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14f7a8f8b8b8b8b%3A0x8b6f9c9d4e4f3b2c!2sMansoura!5e0!3m2!1sen!2seg!4v1644512345678" width="100%" height="160" style="border:0;" allowfullscreen></iframe>
           </div>
@@ -1208,52 +1172,89 @@
         <a href="#" target="_blank"><i class="fab fa-linkedin"></i></a>
         <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
       </div>
-      <div>© 2026 منصة المعلم. جميع الحقوق محفوظة.</div>
+      <div>© 2026 منصة المعلم</div>
       <div class="back-top" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-arrow-up"></i></div>
     </footer>
   </div>
 
   <script>
-    // ============ DATA ============
-    let accounts = [
-      { name: 'يوتيوب', url: '#', icon: 'fab fa-youtube', platform: 'youtube' },
-      { name: 'فيسبوك', url: 'https://www.facebook.com/share/1DnNff9zJm/', icon: 'fab fa-facebook',
-        platform: 'facebook' },
-      { name: 'تيك توك', url: '#', icon: 'fab fa-tiktok', platform: 'tiktok' },
-      { name: 'تيليجرام', url: '#', icon: 'fab fa-telegram', platform: 'telegram' },
-      { name: 'إنستجرام', url: 'https://www.instagram.com/karim_psher', icon: 'fab fa-instagram',
-        platform: 'instagram' },
-      { name: 'واتساب', url: 'https://wa.me/201060949401', icon: 'fab fa-whatsapp', platform: 'whatsapp' },
-      { name: 'لينكدإن', url: '#', icon: 'fab fa-linkedin', platform: 'linkedin' },
-      { name: 'تويتر', url: '#', icon: 'fab fa-twitter', platform: 'twitter' }
-    ];
+    // ============================================================
+    // 1. تحميل البيانات من localStorage أو استخدام البيانات الافتراضية
+    // ============================================================
+    function loadData() {
+      const saved = localStorage.getItem('teacherData');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          return getDefaultData();
+        }
+      }
+      return getDefaultData();
+    }
 
-    let certificates = [
-      { name: 'Microsoft Certified Educator', url: 'https://via.placeholder.com/300x200/FF0000/fff?text=Microsoft' },
-      { name: 'Education Expert', url: 'https://via.placeholder.com/300x200/10b981/fff?text=Education' },
-      { name: 'Problem Solving Skills', url: 'https://via.placeholder.com/300x200/f59e0b/fff?text=Problem+Solving' },
-      { name: 'Microsoft Office 2019', url: 'https://via.placeholder.com/300x200/ef4444/fff?text=Office' },
-      { name: 'شهادة شكر - كلية الحقوق', url: 'https://via.placeholder.com/300x200/8b5cf6/fff?text=%D8%B4%D9%83%D8%B1' },
-      { name: 'شهادة شكر - الجوالة', url: 'https://via.placeholder.com/300x200/ec4899/fff?text=%D8%A7%D9%84%D8%AC%D9%88%D8%A7%D9%84%D8%A9' },
-      { name: 'AI & Cyber Security', url: 'https://via.placeholder.com/300x200/06b6d4/fff?text=AI' },
-      { name: 'Marketing & Digital Marketing', url: 'https://via.placeholder.com/300x200/f97316/fff?text=Marketing' },
-      { name: 'English Workshop', url: 'https://via.placeholder.com/300x200/14b8a6/fff?text=English' },
-      { name: 'Leadership Skills', url: 'https://via.placeholder.com/300x200/6366f1/fff?text=Leadership' },
-      { name: 'How to be HR', url: 'https://via.placeholder.com/300x200/8b5cf6/fff?text=HR' },
-      { name: 'Soft Skills Workshop', url: 'https://via.placeholder.com/300x200/ec4899/fff?text=Soft+Skills' },
-      { name: 'Core Career Skills Program', url: 'https://via.placeholder.com/300x200/3b82f6/fff?text=Career' }
-    ];
+    function getDefaultData() {
+      return {
+        name: 'مستر كريم',
+        title: 'معلم العلوم والعلوم المتكاملة - عام ولغات',
+        bio: 'ابتدائي - إعدادي - ثانوي',
+        avatar: 'https://i.pravatar.cc/300?img=12',
+        accounts: [
+          { name: 'يوتيوب', url: '#', icon: 'fab fa-youtube', platform: 'youtube' },
+          { name: 'فيسبوك', url: 'https://www.facebook.com/share/1DnNff9zJm/', icon: 'fab fa-facebook',
+            platform: 'facebook' },
+          { name: 'تيك توك', url: '#', icon: 'fab fa-tiktok', platform: 'tiktok' },
+          { name: 'تيليجرام', url: '#', icon: 'fab fa-telegram', platform: 'telegram' },
+          { name: 'إنستجرام', url: 'https://www.instagram.com/karim_psher', icon: 'fab fa-instagram',
+            platform: 'instagram' },
+          { name: 'واتساب', url: 'https://wa.me/201060949401', icon: 'fab fa-whatsapp', platform: 'whatsapp' },
+          { name: 'لينكدإن', url: '#', icon: 'fab fa-linkedin', platform: 'linkedin' },
+          { name: 'تويتر', url: '#', icon: 'fab fa-twitter', platform: 'twitter' }
+        ],
+        certificates: [
+          { name: 'Microsoft Certified Educator', url: 'https://via.placeholder.com/300x200/FF0000/fff?text=Microsoft' },
+          { name: 'Education Expert', url: 'https://via.placeholder.com/300x200/10b981/fff?text=Education' },
+          { name: 'Problem Solving Skills', url: 'https://via.placeholder.com/300x200/f59e0b/fff?text=Problem' },
+          { name: 'Microsoft Office 2019', url: 'https://via.placeholder.com/300x200/ef4444/fff?text=Office' },
+          { name: 'شهادة شكر', url: 'https://via.placeholder.com/300x200/8b5cf6/fff?text=%D8%B4%D9%83%D8%B1' },
+          { name: 'AI & Cyber Security', url: 'https://via.placeholder.com/300x200/06b6d4/fff?text=AI' },
+          { name: 'Marketing', url: 'https://via.placeholder.com/300x200/f97316/fff?text=Marketing' },
+          { name: 'English Workshop', url: 'https://via.placeholder.com/300x200/14b8a6/fff?text=English' },
+          { name: 'Leadership Skills', url: 'https://via.placeholder.com/300x200/6366f1/fff?text=Leadership' },
+          { name: 'How to be HR', url: 'https://via.placeholder.com/300x200/8b5cf6/fff?text=HR' },
+          { name: 'Soft Skills', url: 'https://via.placeholder.com/300x200/ec4899/fff?text=Soft+Skills' },
+          { name: 'Core Career Skills', url: 'https://via.placeholder.com/300x200/3b82f6/fff?text=Career' }
+        ],
+        gallery: [
+          'https://picsum.photos/seed/teach1/400/300',
+          'https://picsum.photos/seed/teach2/400/300',
+          'https://picsum.photos/seed/teach3/400/300',
+          'https://picsum.photos/seed/teach4/400/300',
+          'https://picsum.photos/seed/teach5/400/300',
+          'https://picsum.photos/seed/teach6/400/300'
+        ]
+      };
+    }
 
-    let galleryImages = [
-      'https://picsum.photos/seed/teach1/400/300',
-      'https://picsum.photos/seed/teach2/400/300',
-      'https://picsum.photos/seed/teach3/400/300',
-      'https://picsum.photos/seed/teach4/400/300',
-      'https://picsum.photos/seed/teach5/400/300',
-      'https://picsum.photos/seed/teach6/400/300'
-    ];
+    let data = loadData();
 
-    // ============ IMAGE UPLOAD FROM LOCAL ============
+    // ============================================================
+    // 2. حفظ البيانات في localStorage
+    // ============================================================
+    function saveData() {
+      localStorage.setItem('teacherData', JSON.stringify(data));
+      showSaveNotice();
+    }
+
+    function showSaveNotice() {
+      const notice = document.getElementById('saveNotice');
+      notice.style.display = 'block';
+      setTimeout(() => { notice.style.display = 'none'; }, 2000);
+    }
+
+    // ============================================================
+    // 3. رفع الصور من الجهاز
+    // ============================================================
     let uploadedImageData = null;
 
     document.getElementById('fileInput').addEventListener('change', function(e) {
@@ -1262,7 +1263,7 @@
         const reader = new FileReader();
         reader.onload = function(event) {
           uploadedImageData = event.target.result;
-          document.getElementById('imagePreview').style.display = 'block';
+          document.getElementById('uploadPreview').style.display = 'block';
           document.getElementById('previewImg').src = uploadedImageData;
         };
         reader.readAsDataURL(file);
@@ -1271,32 +1272,56 @@
 
     function useUploadedImage() {
       if (uploadedImageData) {
-        // Use for profile avatar
+        data.avatar = uploadedImageData;
         document.getElementById('profile-avatar').src = uploadedImageData;
         document.getElementById('avatar-url').value = uploadedImageData;
-        alert('✅ تم تحديث الصورة الشخصية!');
+        saveData();
         clearUpload();
+        alert('✅ تم تحديث الصورة الشخصية وحفظها!');
       }
     }
 
     function useUploadedImageForCert() {
       if (uploadedImageData) {
         document.getElementById('new-cert-url').value = uploadedImageData;
-        alert('✅ تم إضافة رابط الصورة في حقل الشهادة!');
         clearUpload();
+        alert('✅ تم إضافة رابط الصورة في حقل الشهادة!');
       }
     }
 
     function clearUpload() {
-      document.getElementById('imagePreview').style.display = 'none';
+      document.getElementById('uploadPreview').style.display = 'none';
       document.getElementById('fileInput').value = '';
       uploadedImageData = null;
     }
 
-    // ============ RENDER FUNCTIONS ============
+    // ============================================================
+    // 4. عرض البيانات
+    // ============================================================
+    function renderAll() {
+      // Profile
+      document.getElementById('display-name').textContent = data.name;
+      document.getElementById('display-title').textContent = data.title;
+      document.getElementById('display-bio').textContent = data.bio;
+      document.getElementById('profile-avatar').src = data.avatar;
+
+      // Dashboard inputs
+      document.getElementById('edit-name').value = data.name;
+      document.getElementById('edit-title').value = data.title;
+      document.getElementById('edit-bio').value = data.bio;
+      document.getElementById('avatar-url').value = data.avatar;
+
+      // Accounts
+      renderAccounts();
+      // Certificates
+      renderCertificates();
+      // Gallery
+      renderGallery();
+    }
+
     function renderAccounts() {
       const container = document.getElementById('accounts-container');
-      container.innerHTML = accounts.map((acc) => `
+      container.innerHTML = data.accounts.map((acc) => `
             <div class="account-card platform-${acc.platform || ''}">
               <div class="platform-icon"><i class="${acc.icon}"></i></div>
               <h4>${acc.name}</h4>
@@ -1306,7 +1331,7 @@
           `).join('');
 
       const list = document.getElementById('account-list');
-      list.innerHTML = accounts.map((acc, idx) => `
+      list.innerHTML = data.accounts.map((acc, idx) => `
             <div class="list-item">
               <span class="item-name"><i class="${acc.icon}"></i> ${acc.name}</span>
               <button class="btn-danger" onclick="removeAccount(${idx})">حذف</button>
@@ -1316,7 +1341,7 @@
 
     function renderCertificates() {
       const container = document.getElementById('certificates-container');
-      container.innerHTML = certificates.map((cert) => `
+      container.innerHTML = data.certificates.map((cert) => `
             <div class="cert-card" onclick="openLightbox('${cert.url}')">
               <img src="${cert.url}" alt="${cert.name}" onerror="this.src='https://via.placeholder.com/300x200/3b82f6/fff?text=شهادة'" />
               <div class="cert-name">${cert.name}</div>
@@ -1324,7 +1349,7 @@
           `).join('');
 
       const list = document.getElementById('cert-list');
-      list.innerHTML = certificates.map((cert, idx) => `
+      list.innerHTML = data.certificates.map((cert, idx) => `
             <div class="list-item">
               <span class="item-name">📜 ${cert.name}</span>
               <button class="btn-danger" onclick="removeCertificate(${idx})">حذف</button>
@@ -1334,12 +1359,90 @@
 
     function renderGallery() {
       const container = document.getElementById('gallery-grid');
-      container.innerHTML = galleryImages.map(img => `
+      container.innerHTML = data.gallery.map(img => `
             <img src="${img}" onclick="openLightbox('${img}')" onerror="this.src='https://via.placeholder.com/400x300/3b82f6/fff?text=صورة'" />
           `).join('');
     }
 
-    // ============ LIGHTBOX ============
+    // ============================================================
+    // 5. دوال التعديل
+    // ============================================================
+    function updateProfile() {
+      data.name = document.getElementById('edit-name').value;
+      data.title = document.getElementById('edit-title').value;
+      data.bio = document.getElementById('edit-bio').value;
+      saveData();
+      renderAll();
+      alert('✅ تم تحديث البيانات وحفظها!');
+    }
+
+    function updateAvatar() {
+      const url = document.getElementById('avatar-url').value.trim();
+      if (url) {
+        data.avatar = url;
+        saveData();
+        renderAll();
+        alert('✅ تم تغيير الصورة وحفظها!');
+      } else {
+        alert('⚠️ يرجى إدخال رابط الصورة');
+      }
+    }
+
+    function addAccount() {
+      const name = document.getElementById('new-account-name').value.trim();
+      const url = document.getElementById('new-account-url').value.trim() || '#';
+      const icon = document.getElementById('new-account-icon').value.trim() || 'fas fa-link';
+      if (!name) { alert('يرجى إدخال اسم المنصة'); return; }
+      let platform = '';
+      if (icon.includes('youtube')) platform = 'youtube';
+      else if (icon.includes('facebook')) platform = 'facebook';
+      else if (icon.includes('tiktok')) platform = 'tiktok';
+      else if (icon.includes('telegram')) platform = 'telegram';
+      else if (icon.includes('instagram')) platform = 'instagram';
+      else if (icon.includes('whatsapp')) platform = 'whatsapp';
+      else if (icon.includes('linkedin')) platform = 'linkedin';
+      else if (icon.includes('twitter')) platform = 'twitter';
+
+      data.accounts.push({ name, url, icon, platform });
+      saveData();
+      renderAccounts();
+      document.getElementById('new-account-name').value = '';
+      document.getElementById('new-account-url').value = '';
+      document.getElementById('new-account-icon').value = 'fab fa-youtube';
+      alert('✅ تم إضافة الحساب وحفظه!');
+    }
+
+    function removeAccount(idx) {
+      if (confirm('هل أنت متأكد من حذف هذا الحساب؟')) {
+        data.accounts.splice(idx, 1);
+        saveData();
+        renderAccounts();
+      }
+    }
+
+    function addCertificate() {
+      const name = document.getElementById('new-cert-name').value.trim();
+      const url = document.getElementById('new-cert-url').value.trim();
+      if (!name || !url) { alert('يرجى إدخال اسم الشهادة ورابط الصورة'); return; }
+      data.certificates.push({ name, url });
+      saveData();
+      renderCertificates();
+      document.getElementById('new-cert-name').value = '';
+      document.getElementById('new-cert-url').value = '';
+      alert('✅ تم إضافة الشهادة وحفظها!');
+    }
+
+    function removeCertificate(idx) {
+      if (confirm('هل أنت متأكد من حذف هذه الشهادة؟')) {
+        data.certificates.splice(idx, 1);
+        saveData();
+        renderCertificates();
+      }
+    }
+
+    // ============================================================
+    // 6. دوال مساعدة
+    // ============================================================
     function openLightbox(src) {
       const existing = document.querySelector('.lightbox-overlay');
       if (existing) existing.remove();
@@ -1351,7 +1454,32 @@
       document.body.appendChild(overlay);
     }
 
-    // ============ DASHBOARD ============
+    function toggleFaq(el) {
+      const answer = el.nextElementSibling;
+      const icon = el.querySelector('span');
+      if (answer.classList.contains('open')) {
+        answer.classList.remove('open');
+        icon.textContent = '+';
+      } else {
+        answer.classList.add('open');
+        icon.textContent = '−';
+      }
+    }
+
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+      const icon = document.querySelector('.theme-toggle i');
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
+    }
+
+    function sendMessage() {
+      alert('✅ تم إرسال رسالتك بنجاح!');
+    }
+
+    // ============================================================
+    // 7. لوحة التحكم والباسورد
+    // ============================================================
     let dashboardUnlocked = false;
 
     function openDashboard() {
@@ -1391,98 +1519,14 @@
       }
     });
 
-    function updateProfile() {
-      document.getElementById('display-name').textContent = document.getElementById('edit-name').value;
-      document.getElementById('display-title').textContent = document.getElementById('edit-title').value;
-      document.getElementById('display-bio').textContent = document.getElementById('edit-bio').value;
-      alert('✅ تم تحديث البيانات الشخصية');
-    }
-
-    function updateAvatar() {
-      const url = document.getElementById('avatar-url').value.trim();
-      if (url) {
-        document.getElementById('profile-avatar').src = url;
-        alert('✅ تم تغيير الصورة الشخصية');
-      } else {
-        alert('⚠️ يرجى إدخال رابط الصورة');
-      }
-    }
-
-    function addAccount() {
-      const name = document.getElementById('new-account-name').value.trim();
-      const url = document.getElementById('new-account-url').value.trim() || '#';
-      const icon = document.getElementById('new-account-icon').value.trim() || 'fas fa-link';
-      if (!name) { alert('يرجى إدخال اسم المنصة'); return; }
-      let platform = '';
-      if (icon.includes('youtube')) platform = 'youtube';
-      else if (icon.includes('facebook')) platform = 'facebook';
-      else if (icon.includes('tiktok')) platform = 'tiktok';
-      else if (icon.includes('telegram')) platform = 'telegram';
-      else if (icon.includes('instagram')) platform = 'instagram';
-      else if (icon.includes('whatsapp')) platform = 'whatsapp';
-      else if (icon.includes('linkedin')) platform = 'linkedin';
-      else if (icon.includes('twitter')) platform = 'twitter';
-
-      accounts.push({ name, url, icon, platform });
-      renderAccounts();
-      document.getElementById('new-account-name').value = '';
-      document.getElementById('new-account-url').value = '';
-      document.getElementById('new-account-icon').value = 'fab fa-youtube';
-      alert('✅ تم إضافة الحساب');
-    }
-
-    function removeAccount(idx) {
-      if (confirm('هل أنت متأكد من حذف هذا الحساب؟')) {
-        accounts.splice(idx, 1);
-        renderAccounts();
-      }
-    }
-
-    function addCertificate() {
-      const name = document.getElementById('new-cert-name').value.trim();
-      const url = document.getElementById('new-cert-url').value.trim();
-      if (!name || !url) { alert('يرجى إدخال اسم الشهادة ورابط الصورة'); return; }
-      certificates.push({ name, url });
-      renderCertificates();
-      document.getElementById('new-cert-name').value = '';
-      document.getElementById('new-cert-url').value = '';
-      alert('✅ تم إضافة الشهادة');
-    }
-
-    function removeCertificate(idx) {
-      if (confirm('هل أنت متأكد من حذف هذه الشهادة؟')) {
-        certificates.splice(idx, 1);
-        renderCertificates();
-      }
-    }
-
-    // ============ FAQ ============
-    function toggleFaq(el) {
-      const answer = el.nextElementSibling;
-      const icon = el.querySelector('span');
-      if (answer.classList.contains('open')) {
-        answer.classList.remove('open');
-        icon.textContent = '+';
-      } else {
-        answer.classList.add('open');
-        icon.textContent = '−';
-      }
-    }
-
-    // ============ THEME ============
-    function toggleTheme() {
-      document.body.classList.toggle('dark');
-      const icon = document.querySelector('.theme-toggle i');
-      icon.classList.toggle('fa-moon');
-      icon.classList.toggle('fa-sun');
-    }
-
-    // ============ COUNTER ANIMATION ============
+    // ============================================================
+    // 8. Counters Animation
+    // ============================================================
     function animateCounters() {
       document.querySelectorAll('.number[data-count]').forEach(counter => {
         const target = parseInt(counter.dataset.count);
         let current = 0;
-        const increment = Math.ceil(target / 50);
+        const increment = Math.ceil(target / 40);
         const interval = setInterval(() => {
           current += increment;
           if (current >= target) {
@@ -1495,7 +1539,9 @@
       });
     }
 
-    // ============ SCROLL ANIMATIONS ============
+    // ============================================================
+    // 9. Scroll Animations
+    // ============================================================
     function setupScrollAnimations() {
       document.querySelectorAll('.fade-up').forEach(el => {
         const observer = new IntersectionObserver((entries) => {
@@ -1509,21 +1555,16 @@
       });
     }
 
-    // ============ SEND MESSAGE ============
-    function sendMessage() {
-      alert('✅ تم إرسال رسالتك بنجاح! سيتم الرد عليك قريباً.');
-    }
-
-    // ============ ON LOAD ============
+    // ============================================================
+    // 10. On Load
+    // ============================================================
     window.onload = function() {
+      renderAll();
       setTimeout(() => {
         document.getElementById('loading-screen').classList.add('hide');
-        renderAccounts();
-        renderCertificates();
-        renderGallery();
         animateCounters();
         setupScrollAnimations();
-      }, 800);
+      }, 500);
     };
   </script>
 </body>
