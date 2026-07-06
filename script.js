@@ -10,12 +10,10 @@ function getDefaultData() {
     counters: { students: 1250, experience: 4, courses: 24, certificates: 12 },
     accounts: [
       { name: 'يوتيوب', url: '#', icon: 'fab fa-youtube', platform: 'youtube' },
-      { name: 'فيسبوك', url: 'https://www.facebook.com/share/1DnNff9zJm/', icon: 'fab fa-facebook',
-        platform: 'facebook' },
+      { name: 'فيسبوك', url: 'https://www.facebook.com/share/1DnNff9zJm/', icon: 'fab fa-facebook', platform: 'facebook' },
       { name: 'تيك توك', url: '#', icon: 'fab fa-tiktok', platform: 'tiktok' },
       { name: 'تيليجرام', url: '#', icon: 'fab fa-telegram', platform: 'telegram' },
-      { name: 'إنستجرام', url: 'https://www.instagram.com/karim_psher', icon: 'fab fa-instagram',
-        platform: 'instagram' },
+      { name: 'إنستجرام', url: 'https://www.instagram.com/karim_psher', icon: 'fab fa-instagram', platform: 'instagram' },
       { name: 'واتساب', url: 'https://wa.me/201060949401', icon: 'fab fa-whatsapp', platform: 'whatsapp' },
       { name: 'لينكدإن', url: '#', icon: 'fab fa-linkedin', platform: 'linkedin' },
       { name: 'تويتر', url: '#', icon: 'fab fa-twitter', platform: 'twitter' }
@@ -44,13 +42,13 @@ function getDefaultData() {
 }
 
 function loadData() {
-  const saved = localStorage.getItem('teacherData');
-  if (saved) {
-    try {
+  try {
+    const saved = localStorage.getItem('teacherData');
+    if (saved) {
       return JSON.parse(saved);
-    } catch (e) {
-      return getDefaultData();
     }
+  } catch (e) {
+    console.log('خطأ في تحميل البيانات، سيتم استخدام البيانات الافتراضية');
   }
   return getDefaultData();
 }
@@ -61,14 +59,20 @@ let data = loadData();
 // 2. حفظ البيانات
 // ============================================================
 function saveData() {
-  localStorage.setItem('teacherData', JSON.stringify(data));
-  showSaveNotice();
+  try {
+    localStorage.setItem('teacherData', JSON.stringify(data));
+    showSaveNotice();
+  } catch (e) {
+    console.log('خطأ في حفظ البيانات');
+  }
 }
 
 function showSaveNotice() {
   const notice = document.getElementById('saveNotice');
-  notice.style.display = 'block';
-  setTimeout(() => { notice.style.display = 'none'; }, 2000);
+  if (notice) {
+    notice.style.display = 'block';
+    setTimeout(() => { notice.style.display = 'none'; }, 2000);
+  }
 }
 
 // ============================================================
@@ -76,24 +80,34 @@ function showSaveNotice() {
 // ============================================================
 let uploadedImageData = null;
 
-document.getElementById('fileInput').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      uploadedImageData = event.target.result;
-      document.getElementById('uploadPreview').style.display = 'block';
-      document.getElementById('previewImg').src = uploadedImageData;
-    };
-    reader.readAsDataURL(file);
+// تأكد من وجود العناصر قبل إضافة الأحداث
+document.addEventListener('DOMContentLoaded', function() {
+  const fileInput = document.getElementById('fileInput');
+  if (fileInput) {
+    fileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          uploadedImageData = event.target.result;
+          const preview = document.getElementById('uploadPreview');
+          const previewImg = document.getElementById('previewImg');
+          if (preview) preview.style.display = 'block';
+          if (previewImg) previewImg.src = uploadedImageData;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
   }
 });
 
 function useUploadedImage() {
   if (uploadedImageData) {
     data.avatar = uploadedImageData;
-    document.getElementById('profile-avatar').src = uploadedImageData;
-    document.getElementById('avatar-url').value = uploadedImageData;
+    const avatar = document.getElementById('profile-avatar');
+    const avatarUrl = document.getElementById('avatar-url');
+    if (avatar) avatar.src = uploadedImageData;
+    if (avatarUrl) avatarUrl.value = uploadedImageData;
     saveData();
     clearUpload();
     alert('✅ تم تحديث الصورة الشخصية وحفظها!');
@@ -102,7 +116,8 @@ function useUploadedImage() {
 
 function useUploadedImageForCert() {
   if (uploadedImageData) {
-    document.getElementById('new-cert-url').value = uploadedImageData;
+    const certUrl = document.getElementById('new-cert-url');
+    if (certUrl) certUrl.value = uploadedImageData;
     clearUpload();
     alert('✅ تم إضافة رابط الصورة في حقل الشهادة!');
   }
@@ -110,67 +125,83 @@ function useUploadedImageForCert() {
 
 function useUploadedImageForGallery() {
   if (uploadedImageData) {
-    document.getElementById('new-gallery-url').value = uploadedImageData;
+    const galleryUrl = document.getElementById('new-gallery-url');
+    if (galleryUrl) galleryUrl.value = uploadedImageData;
     clearUpload();
     alert('✅ تم إضافة رابط الصورة في حقل معرض الصور!');
   }
 }
 
 function clearUpload() {
-  document.getElementById('uploadPreview').style.display = 'none';
-  document.getElementById('fileInput').value = '';
+  const preview = document.getElementById('uploadPreview');
+  const fileInput = document.getElementById('fileInput');
+  if (preview) preview.style.display = 'none';
+  if (fileInput) fileInput.value = '';
   uploadedImageData = null;
 }
 
 // ============================================================
-// 4. عرض البيانات
+// 4. عرض البيانات (مع التحقق من وجود العناصر)
 // ============================================================
 function renderAll() {
-  // Profile
-  document.getElementById('display-name').textContent = data.name;
-  document.getElementById('display-title').textContent = data.title;
-  document.getElementById('display-bio').textContent = data.bio;
-  document.getElementById('profile-avatar').src = data.avatar;
+  try {
+    // Profile
+    const displayName = document.getElementById('display-name');
+    const displayTitle = document.getElementById('display-title');
+    const displayBio = document.getElementById('display-bio');
+    const profileAvatar = document.getElementById('profile-avatar');
+    
+    if (displayName) displayName.textContent = data.name;
+    if (displayTitle) displayTitle.textContent = data.title;
+    if (displayBio) displayBio.textContent = data.bio;
+    if (profileAvatar) profileAvatar.src = data.avatar;
 
-  // Dashboard inputs
-  document.getElementById('edit-name').value = data.name;
-  document.getElementById('edit-title').value = data.title;
-  document.getElementById('edit-bio').value = data.bio;
-  document.getElementById('avatar-url').value = data.avatar;
+    // Dashboard inputs
+    const editName = document.getElementById('edit-name');
+    const editTitle = document.getElementById('edit-title');
+    const editBio = document.getElementById('edit-bio');
+    const avatarUrl = document.getElementById('avatar-url');
+    
+    if (editName) editName.value = data.name;
+    if (editTitle) editTitle.value = data.title;
+    if (editBio) editBio.value = data.bio;
+    if (avatarUrl) avatarUrl.value = data.avatar;
 
-  // Counters
-  document.getElementById('counter-students').value = data.counters.students;
-  document.getElementById('counter-experience').value = data.counters.experience;
-  document.getElementById('counter-courses').value = data.counters.courses;
-  document.getElementById('counter-certificates').value = data.counters.certificates;
-  document.getElementById('counter-students-display').textContent = data.counters.students;
-  document.getElementById('counter-experience-display').textContent = data.counters.experience;
-  document.getElementById('counter-courses-display').textContent = data.counters.courses;
-  document.getElementById('counter-certificates-display').textContent = data.counters.certificates;
+    // Counters
+    const counters = ['students', 'experience', 'courses', 'certificates'];
+    counters.forEach(key => {
+      const input = document.getElementById('counter-' + key);
+      const display = document.getElementById('counter-' + key + '-display');
+      if (input) input.value = data.counters[key] || 0;
+      if (display) display.textContent = data.counters[key] || 0;
+    });
 
-  // Accounts
-  renderAccounts();
-  // Certificates
-  renderCertificates();
-  // Gallery
-  renderGallery();
-  // Achievements
-  renderAchievements();
+    renderAccounts();
+    renderCertificates();
+    renderGallery();
+    renderAchievements();
+  } catch (e) {
+    console.log('خطأ في عرض البيانات:', e);
+  }
 }
 
 function renderAccounts() {
-  const container = document.getElementById('accounts-container');
-  container.innerHTML = data.accounts.map((acc) => `
-        <div class="account-card platform-${acc.platform || ''}">
-          <div class="platform-icon"><i class="${acc.icon}"></i></div>
-          <h4>${acc.name}</h4>
-          <p>${acc.url.replace(/^https?:\/\//, '').slice(0, 20) || 'رابط'}</p>
-          <a href="${acc.url}" target="_blank"><button class="btn-primary btn-sm">زيارة</button></a>
-        </div>
-      `).join('');
+  try {
+    const container = document.getElementById('accounts-container');
+    if (!container) return;
+    
+    container.innerHTML = data.accounts.map((acc) => `
+      <div class="account-card platform-${acc.platform || ''}">
+        <div class="platform-icon"><i class="${acc.icon}"></i></div>
+        <h4>${acc.name}</h4>
+        <p>${acc.url.replace(/^https?:\/\//, '').slice(0, 20) || 'رابط'}</p>
+        <a href="${acc.url}" target="_blank"><button class="btn-primary btn-sm">زيارة</button></a>
+      </div>
+    `).join('');
 
-  const list = document.getElementById('account-list');
-  list.innerHTML = data.accounts.map((acc, idx) => `
+    const list = document.getElementById('account-list');
+    if (list) {
+      list.innerHTML = data.accounts.map((acc, idx) => `
         <div class="list-item">
           <span class="item-name"><i class="${acc.icon}"></i> ${acc.name}</span>
           <div>
@@ -178,19 +209,27 @@ function renderAccounts() {
           </div>
         </div>
       `).join('');
+    }
+  } catch (e) {
+    console.log('خطأ في عرض الحسابات:', e);
+  }
 }
 
 function renderCertificates() {
-  const container = document.getElementById('certificates-container');
-  container.innerHTML = data.certificates.map((cert) => `
-        <div class="cert-card" onclick="openLightbox('${cert.url}')">
-          <img src="${cert.url}" alt="${cert.name}" onerror="this.src='https://via.placeholder.com/300x200/3b82f6/fff?text=شهادة'" />
-          <div class="cert-name">${cert.name}</div>
-        </div>
-      `).join('');
+  try {
+    const container = document.getElementById('certificates-container');
+    if (!container) return;
+    
+    container.innerHTML = data.certificates.map((cert) => `
+      <div class="cert-card" onclick="openLightbox('${cert.url}')">
+        <img src="${cert.url}" alt="${cert.name}" onerror="this.src='https://via.placeholder.com/300x200/3b82f6/fff?text=شهادة'" />
+        <div class="cert-name">${cert.name}</div>
+      </div>
+    `).join('');
 
-  const list = document.getElementById('cert-list');
-  list.innerHTML = data.certificates.map((cert, idx) => `
+    const list = document.getElementById('cert-list');
+    if (list) {
+      list.innerHTML = data.certificates.map((cert, idx) => `
         <div class="list-item">
           <span class="item-name">📜 ${cert.name}</span>
           <div>
@@ -199,38 +238,54 @@ function renderCertificates() {
           </div>
         </div>
       `).join('');
+    }
+  } catch (e) {
+    console.log('خطأ في عرض الشهادات:', e);
+  }
 }
 
 function renderGallery() {
-  const container = document.getElementById('gallery-container');
-  container.innerHTML = data.gallery.map((img, idx) => `
-        <div class="gallery-item-wrapper">
-          <img src="${img}" onclick="openLightbox('${img}')" onerror="this.src='https://via.placeholder.com/400x300/3b82f6/fff?text=صورة'" />
-          <button class="gallery-delete-btn" onclick="event.stopPropagation();removeGalleryImage(${idx})"><i class="fas fa-trash"></i></button>
-        </div>
-      `).join('');
+  try {
+    const container = document.getElementById('gallery-container');
+    if (!container) return;
+    
+    container.innerHTML = data.gallery.map((img, idx) => `
+      <div class="gallery-item-wrapper">
+        <img src="${img}" onclick="openLightbox('${img}')" onerror="this.src='https://via.placeholder.com/400x300/3b82f6/fff?text=صورة'" />
+        <button class="gallery-delete-btn" onclick="event.stopPropagation();removeGalleryImage(${idx})"><i class="fas fa-trash"></i></button>
+      </div>
+    `).join('');
 
-  const list = document.getElementById('gallery-list');
-  list.innerHTML = data.gallery.map((img, idx) => `
+    const list = document.getElementById('gallery-list');
+    if (list) {
+      list.innerHTML = data.gallery.map((img, idx) => `
         <div class="list-item">
           <span class="item-name">🖼️ صورة ${idx + 1}</span>
           <button class="btn-danger" onclick="removeGalleryImage(${idx})">حذف</button>
         </div>
       `).join('');
+    }
+  } catch (e) {
+    console.log('خطأ في عرض المعرض:', e);
+  }
 }
 
 function renderAchievements() {
-  const container = document.getElementById('achievements-container');
-  container.innerHTML = data.achievements.map((ach) => `
-        <div class="achievement-card">
-          <div class="icon"><i class="fas ${ach.icon}"></i></div>
-          <div class="number">${ach.number}</div>
-          <div class="label">${ach.label}</div>
-        </div>
-      `).join('');
+  try {
+    const container = document.getElementById('achievements-container');
+    if (!container) return;
+    
+    container.innerHTML = data.achievements.map((ach) => `
+      <div class="achievement-card">
+        <div class="icon"><i class="fas ${ach.icon}"></i></div>
+        <div class="number">${ach.number}</div>
+        <div class="label">${ach.label}</div>
+      </div>
+    `).join('');
 
-  const list = document.getElementById('achievement-list');
-  list.innerHTML = data.achievements.map((ach, idx) => `
+    const list = document.getElementById('achievement-list');
+    if (list) {
+      list.innerHTML = data.achievements.map((ach, idx) => `
         <div class="list-item">
           <span class="item-name"><i class="fas ${ach.icon}"></i> ${ach.label} (${ach.number})</span>
           <div>
@@ -239,65 +294,98 @@ function renderAchievements() {
           </div>
         </div>
       `).join('');
+    }
+  } catch (e) {
+    console.log('خطأ في عرض الإنجازات:', e);
+  }
 }
 
 // ============================================================
-// 5. دوال التعديل
+// 5. دوال التعديل (مع التحقق)
 // ============================================================
 function updateProfile() {
-  data.name = document.getElementById('edit-name').value;
-  data.title = document.getElementById('edit-title').value;
-  data.bio = document.getElementById('edit-bio').value;
-  saveData();
-  renderAll();
-  alert('✅ تم تحديث البيانات وحفظها!');
+  try {
+    const name = document.getElementById('edit-name');
+    const title = document.getElementById('edit-title');
+    const bio = document.getElementById('edit-bio');
+    if (name) data.name = name.value;
+    if (title) data.title = title.value;
+    if (bio) data.bio = bio.value;
+    saveData();
+    renderAll();
+    alert('✅ تم تحديث البيانات وحفظها!');
+  } catch (e) {
+    alert('حدث خطأ: ' + e.message);
+  }
 }
 
 function updateAvatar() {
-  const url = document.getElementById('avatar-url').value.trim();
-  if (url) {
-    data.avatar = url;
-    saveData();
-    renderAll();
-    alert('✅ تم تغيير الصورة وحفظها!');
-  } else {
-    alert('⚠️ يرجى إدخال رابط الصورة');
+  try {
+    const urlInput = document.getElementById('avatar-url');
+    if (!urlInput) return;
+    const url = urlInput.value.trim();
+    if (url) {
+      data.avatar = url;
+      saveData();
+      renderAll();
+      alert('✅ تم تغيير الصورة وحفظها!');
+    } else {
+      alert('⚠️ يرجى إدخال رابط الصورة');
+    }
+  } catch (e) {
+    alert('حدث خطأ: ' + e.message);
   }
 }
 
 function updateCounters() {
-  data.counters.students = parseInt(document.getElementById('counter-students').value) || 0;
-  data.counters.experience = parseInt(document.getElementById('counter-experience').value) || 0;
-  data.counters.courses = parseInt(document.getElementById('counter-courses').value) || 0;
-  data.counters.certificates = parseInt(document.getElementById('counter-certificates').value) || 0;
-  saveData();
-  renderAll();
-  alert('✅ تم تحديث العدادت وحفظها!');
+  try {
+    const keys = ['students', 'experience', 'courses', 'certificates'];
+    keys.forEach(key => {
+      const input = document.getElementById('counter-' + key);
+      if (input) data.counters[key] = parseInt(input.value) || 0;
+    });
+    saveData();
+    renderAll();
+    alert('✅ تم تحديث العدادت وحفظها!');
+  } catch (e) {
+    alert('حدث خطأ: ' + e.message);
+  }
 }
 
 // Counter Edit Popup
 let currentCounterKey = '';
 
 function openCounterEdit(key) {
-  currentCounterKey = key;
-  const popup = document.getElementById('counterEditPopup');
-  const input = document.getElementById('counterEditInput');
-  input.value = data.counters[key] || 0;
-  popup.classList.add('open');
+  try {
+    currentCounterKey = key;
+    const popup = document.getElementById('counterEditPopup');
+    const input = document.getElementById('counterEditInput');
+    if (popup) popup.classList.add('open');
+    if (input) input.value = data.counters[key] || 0;
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function closeCounterEdit() {
-  document.getElementById('counterEditPopup').classList.remove('open');
+  const popup = document.getElementById('counterEditPopup');
+  if (popup) popup.classList.remove('open');
 }
 
 function saveCounterEdit() {
-  const value = parseInt(document.getElementById('counterEditInput').value) || 0;
-  if (currentCounterKey && data.counters[currentCounterKey] !== undefined) {
-    data.counters[currentCounterKey] = value;
-    saveData();
-    renderAll();
-    closeCounterEdit();
-    alert('✅ تم تحديث العداد!');
+  try {
+    const input = document.getElementById('counterEditInput');
+    if (!input) return;
+    const value = parseInt(input.value) || 0;
+    if (currentCounterKey && data.counters[currentCounterKey] !== undefined) {
+      data.counters[currentCounterKey] = value;
+      saveData();
+      renderAll();
+      closeCounterEdit();
+      alert('✅ تم تحديث العداد!');
+    }
+  } catch (e) {
+    alert('حدث خطأ: ' + e.message);
   }
 }
 
@@ -305,27 +393,38 @@ function saveCounterEdit() {
 // 6. دوال الحسابات
 // ============================================================
 function addAccount() {
-  const name = document.getElementById('new-account-name').value.trim();
-  const url = document.getElementById('new-account-url').value.trim() || '#';
-  const icon = document.getElementById('new-account-icon').value.trim() || 'fas fa-link';
-  if (!name) { alert('يرجى إدخال اسم المنصة'); return; }
-  let platform = '';
-  if (icon.includes('youtube')) platform = 'youtube';
-  else if (icon.includes('facebook')) platform = 'facebook';
-  else if (icon.includes('tiktok')) platform = 'tiktok';
-  else if (icon.includes('telegram')) platform = 'telegram';
-  else if (icon.includes('instagram')) platform = 'instagram';
-  else if (icon.includes('whatsapp')) platform = 'whatsapp';
-  else if (icon.includes('linkedin')) platform = 'linkedin';
-  else if (icon.includes('twitter')) platform = 'twitter';
+  try {
+    const nameInput = document.getElementById('new-account-name');
+    const urlInput = document.getElementById('new-account-url');
+    const iconInput = document.getElementById('new-account-icon');
+    if (!nameInput) return;
+    
+    const name = nameInput.value.trim();
+    const url = (urlInput ? urlInput.value.trim() : '#') || '#';
+    const icon = (iconInput ? iconInput.value.trim() : 'fas fa-link') || 'fas fa-link';
+    
+    if (!name) { alert('يرجى إدخال اسم المنصة'); return; }
+    
+    let platform = '';
+    if (icon.includes('youtube')) platform = 'youtube';
+    else if (icon.includes('facebook')) platform = 'facebook';
+    else if (icon.includes('tiktok')) platform = 'tiktok';
+    else if (icon.includes('telegram')) platform = 'telegram';
+    else if (icon.includes('instagram')) platform = 'instagram';
+    else if (icon.includes('whatsapp')) platform = 'whatsapp';
+    else if (icon.includes('linkedin')) platform = 'linkedin';
+    else if (icon.includes('twitter')) platform = 'twitter';
 
-  data.accounts.push({ name, url, icon, platform });
-  saveData();
-  renderAccounts();
-  document.getElementById('new-account-name').value = '';
-  document.getElementById('new-account-url').value = '';
-  document.getElementById('new-account-icon').value = 'fab fa-youtube';
-  alert('✅ تم إضافة الحساب وحفظه!');
+    data.accounts.push({ name, url, icon, platform });
+    saveData();
+    renderAccounts();
+    if (nameInput) nameInput.value = '';
+    if (urlInput) urlInput.value = '';
+    if (iconInput) iconInput.value = 'fab fa-youtube';
+    alert('✅ تم إضافة الحساب وحفظه!');
+  } catch (e) {
+    alert('حدث خطأ: ' + e.message);
+  }
 }
 
 function removeAccount(idx) {
@@ -340,15 +439,24 @@ function removeAccount(idx) {
 // 7. دوال الشهادات
 // ============================================================
 function addCertificate() {
-  const name = document.getElementById('new-cert-name').value.trim();
-  const url = document.getElementById('new-cert-url').value.trim();
-  if (!name || !url) { alert('يرجى إدخال اسم الشهادة ورابط الصورة'); return; }
-  data.certificates.push({ name, url });
-  saveData();
-  renderCertificates();
-  document.getElementById('new-cert-name').value = '';
-  document.getElementById('new-cert-url').value = '';
-  alert('✅ تم إضافة الشهادة وحفظها!');
+  try {
+    const nameInput = document.getElementById('new-cert-name');
+    const urlInput = document.getElementById('new-cert-url');
+    if (!nameInput) return;
+    
+    const name = nameInput.value.trim();
+    const url = urlInput ? urlInput.value.trim() : '';
+    
+    if (!name || !url) { alert('يرجى إدخال اسم الشهادة ورابط الصورة'); return; }
+    data.certificates.push({ name, url });
+    saveData();
+    renderCertificates();
+    if (nameInput) nameInput.value = '';
+    if (urlInput) urlInput.value = '';
+    alert('✅ تم إضافة الشهادة وحفظها!');
+  } catch (e) {
+    alert('حدث خطأ: ' + e.message);
+  }
 }
 
 function removeCertificate(idx) {
@@ -360,13 +468,17 @@ function removeCertificate(idx) {
 }
 
 function editCertificate(idx) {
-  const cert = data.certificates[idx];
-  const newName = prompt('اسم الشهادة:', cert.name);
-  if (newName !== null && newName.trim()) {
-    cert.name = newName.trim();
-    saveData();
-    renderCertificates();
-    alert('✅ تم تعديل الشهادة!');
+  try {
+    const cert = data.certificates[idx];
+    const newName = prompt('اسم الشهادة:', cert.name);
+    if (newName !== null && newName.trim()) {
+      cert.name = newName.trim();
+      saveData();
+      renderCertificates();
+      alert('✅ تم تعديل الشهادة!');
+    }
+  } catch (e) {
+    alert('حدث خطأ: ' + e.message);
   }
 }
 
@@ -374,13 +486,19 @@ function editCertificate(idx) {
 // 8. دوال معرض الصور
 // ============================================================
 function addGalleryImage() {
-  const url = document.getElementById('new-gallery-url').value.trim();
-  if (!url) { alert('يرجى إدخال رابط الصورة'); return; }
-  data.gallery.push(url);
-  saveData();
-  renderGallery();
-  document.getElementById('new-gallery-url').value = '';
-  alert('✅ تم إضافة الصورة!');
+  try {
+    const urlInput = document.getElementById('new-gallery-url');
+    if (!urlInput) return;
+    const url = urlInput.value.trim();
+    if (!url) { alert('يرجى إدخال رابط الصورة'); return; }
+    data.gallery.push(url);
+    saveData();
+    renderGallery();
+    urlInput.value = '';
+    alert('✅ تم إضافة الصورة!');
+  } catch (e) {
+    alert('حدث خطأ: ' + e.message);
+  }
 }
 
 function removeGalleryImage(idx) {
@@ -395,17 +513,27 @@ function removeGalleryImage(idx) {
 // 9. دوال الإنجازات
 // ============================================================
 function addAchievement() {
-  const icon = document.getElementById('new-achievement-icon').value.trim() || 'fa-award';
-  const number = parseInt(document.getElementById('new-achievement-number').value) || 0;
-  const label = document.getElementById('new-achievement-label').value.trim();
-  if (!label) { alert('يرجى إدخال اسم الإنجاز'); return; }
-  data.achievements.push({ icon, number, label });
-  saveData();
-  renderAchievements();
-  document.getElementById('new-achievement-icon').value = 'fa-award';
-  document.getElementById('new-achievement-number').value = '';
-  document.getElementById('new-achievement-label').value = '';
-  alert('✅ تم إضافة الإنجاز!');
+  try {
+    const iconInput = document.getElementById('new-achievement-icon');
+    const numberInput = document.getElementById('new-achievement-number');
+    const labelInput = document.getElementById('new-achievement-label');
+    if (!labelInput) return;
+    
+    const icon = (iconInput ? iconInput.value.trim() : 'fa-award') || 'fa-award';
+    const number = parseInt(numberInput ? numberInput.value : 0) || 0;
+    const label = labelInput.value.trim();
+    
+    if (!label) { alert('يرجى إدخال اسم الإنجاز'); return; }
+    data.achievements.push({ icon, number, label });
+    saveData();
+    renderAchievements();
+    if (iconInput) iconInput.value = 'fa-award';
+    if (numberInput) numberInput.value = '';
+    if (labelInput) labelInput.value = '';
+    alert('✅ تم إضافة الإنجاز!');
+  } catch (e) {
+    alert('حدث خطأ: ' + e.message);
+  }
 }
 
 function removeAchievement(idx) {
@@ -417,21 +545,25 @@ function removeAchievement(idx) {
 }
 
 function editAchievement(idx) {
-  const ach = data.achievements[idx];
-  const newLabel = prompt('اسم الإنجاز:', ach.label);
-  if (newLabel !== null && newLabel.trim()) {
-    ach.label = newLabel.trim();
-    const newNumber = prompt('الرقم:', ach.number);
-    if (newNumber !== null) {
-      ach.number = parseInt(newNumber) || 0;
+  try {
+    const ach = data.achievements[idx];
+    const newLabel = prompt('اسم الإنجاز:', ach.label);
+    if (newLabel !== null && newLabel.trim()) {
+      ach.label = newLabel.trim();
+      const newNumber = prompt('الرقم:', ach.number);
+      if (newNumber !== null) {
+        ach.number = parseInt(newNumber) || 0;
+      }
+      const newIcon = prompt('الأيقونة (مثل: fa-award):', ach.icon);
+      if (newIcon !== null && newIcon.trim()) {
+        ach.icon = newIcon.trim();
+      }
+      saveData();
+      renderAchievements();
+      alert('✅ تم تعديل الإنجاز!');
     }
-    const newIcon = prompt('الأيقونة (مثل: fa-award):', ach.icon);
-    if (newIcon !== null && newIcon.trim()) {
-      ach.icon = newIcon.trim();
-    }
-    saveData();
-    renderAchievements();
-    alert('✅ تم تعديل الإنجاز!');
+  } catch (e) {
+    alert('حدث خطأ: ' + e.message);
   }
 }
 
@@ -439,33 +571,46 @@ function editAchievement(idx) {
 // 10. دوال مساعدة
 // ============================================================
 function openLightbox(src) {
-  const existing = document.querySelector('.lightbox-overlay');
-  if (existing) existing.remove();
-  const overlay = document.createElement('div');
-  overlay.className = 'lightbox-overlay';
-  overlay.innerHTML =
-    `<img src="${src}" onerror="this.src='https://via.placeholder.com/600x400/3b82f6/fff?text=صورة'" />`;
-  overlay.onclick = () => overlay.remove();
-  document.body.appendChild(overlay);
+  try {
+    const existing = document.querySelector('.lightbox-overlay');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.className = 'lightbox-overlay';
+    overlay.innerHTML = `<img src="${src}" onerror="this.src='https://via.placeholder.com/600x400/3b82f6/fff?text=صورة'" />`;
+    overlay.onclick = () => overlay.remove();
+    document.body.appendChild(overlay);
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function toggleFaq(el) {
-  const answer = el.nextElementSibling;
-  const icon = el.querySelector('span');
-  if (answer.classList.contains('open')) {
-    answer.classList.remove('open');
-    icon.textContent = '+';
-  } else {
-    answer.classList.add('open');
-    icon.textContent = '−';
+  try {
+    const answer = el.nextElementSibling;
+    const icon = el.querySelector('span');
+    if (answer.classList.contains('open')) {
+      answer.classList.remove('open');
+      if (icon) icon.textContent = '+';
+    } else {
+      answer.classList.add('open');
+      if (icon) icon.textContent = '−';
+    }
+  } catch (e) {
+    console.log(e);
   }
 }
 
 function toggleTheme() {
-  document.body.classList.toggle('dark');
-  const icon = document.querySelector('.theme-toggle i');
-  icon.classList.toggle('fa-moon');
-  icon.classList.toggle('fa-sun');
+  try {
+    document.body.classList.toggle('dark');
+    const icon = document.querySelector('.theme-toggle i');
+    if (icon) {
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
+    }
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 function sendMessage() {
@@ -478,37 +623,61 @@ function sendMessage() {
 let dashboardUnlocked = false;
 
 function openDashboard() {
-  if (dashboardUnlocked) {
-    document.getElementById('dashboard').classList.add('open');
-    document.getElementById('dashboardOverlay').classList.add('open');
-  } else {
-    document.getElementById('passwordModal').classList.add('open');
-    document.getElementById('passwordInput').value = '';
-    document.getElementById('passwordError').style.display = 'none';
-    setTimeout(() => document.getElementById('passwordInput').focus(), 100);
+  try {
+    if (dashboardUnlocked) {
+      const dashboard = document.getElementById('dashboard');
+      const overlay = document.getElementById('dashboardOverlay');
+      if (dashboard) dashboard.classList.add('open');
+      if (overlay) overlay.classList.add('open');
+    } else {
+      const modal = document.getElementById('passwordModal');
+      const input = document.getElementById('passwordInput');
+      const error = document.getElementById('passwordError');
+      if (modal) modal.classList.add('open');
+      if (input) input.value = '';
+      if (error) error.style.display = 'none';
+      setTimeout(() => { if (input) input.focus(); }, 100);
+    }
+  } catch (e) {
+    console.log(e);
   }
 }
 
 function closeDashboard() {
-  document.getElementById('dashboard').classList.remove('open');
-  document.getElementById('dashboardOverlay').classList.remove('open');
-}
-
-function checkPassword() {
-  const input = document.getElementById('passwordInput').value;
-  if (input === '123') {
-    dashboardUnlocked = true;
-    document.getElementById('passwordModal').classList.remove('open');
-    openDashboard();
-  } else {
-    document.getElementById('passwordError').style.display = 'block';
+  try {
+    const dashboard = document.getElementById('dashboard');
+    const overlay = document.getElementById('dashboardOverlay');
+    if (dashboard) dashboard.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+  } catch (e) {
+    console.log(e);
   }
 }
 
+function checkPassword() {
+  try {
+    const input = document.getElementById('passwordInput');
+    const error = document.getElementById('passwordError');
+    if (!input) return;
+    
+    if (input.value === '123') {
+      dashboardUnlocked = true;
+      const modal = document.getElementById('passwordModal');
+      if (modal) modal.classList.remove('open');
+      openDashboard();
+    } else {
+      if (error) error.style.display = 'block';
+    }
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+// Enter key for password
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Enter') {
     const modal = document.getElementById('passwordModal');
-    if (modal.classList.contains('open')) {
+    if (modal && modal.classList.contains('open')) {
       checkPassword();
     }
   }
@@ -518,22 +687,44 @@ document.addEventListener('keydown', function(e) {
 // 12. Scroll Animations & On Load
 // ============================================================
 function setupScrollAnimations() {
-  document.querySelectorAll('.fade-up').forEach(el => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, { threshold: 0.2 });
-    observer.observe(el);
-  });
+  try {
+    document.querySelectorAll('.fade-up').forEach(el => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.2 });
+      observer.observe(el);
+    });
+  } catch (e) {
+    console.log(e);
+  }
 }
 
-window.onload = function() {
-  renderAll();
-  setTimeout(() => {
-    document.getElementById('loading-screen').classList.add('hide');
-    setupScrollAnimations();
-  }, 500);
-};
+// ============================================================
+// 13. تشغيل الموقع
+// ============================================================
+// استخدام DOMContentLoaded بدلاً من window.onload لضمان تحميل DOM أولاً
+document.addEventListener('DOMContentLoaded', function() {
+  try {
+    renderAll();
+    setTimeout(() => {
+      const loading = document.getElementById('loading-screen');
+      if (loading) loading.classList.add('hide');
+      setupScrollAnimations();
+    }, 500);
+  } catch (e) {
+    console.log('خطأ في التحميل:', e);
+    // إخفاء شاشة التحميل حتى لو في خطأ
+    const loading = document.getElementById('loading-screen');
+    if (loading) loading.classList.add('hide');
+  }
+});
+
+// تأكد من إخفاء شاشة التحميل بعد 3 ثواني كحد أقصى
+setTimeout(() => {
+  const loading = document.getElementById('loading-screen');
+  if (loading) loading.classList.add('hide');
+}, 3000);
