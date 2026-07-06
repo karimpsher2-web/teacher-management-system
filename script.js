@@ -1,17 +1,4 @@
 // ============================================================
-// إعدادات GitHub Gist - استخدم هذا عشان البيانات تتحفظ في السحابة
-// ============================================================
-// 👇 ضع الـ Gist ID بتاعك هنا عشان البيانات تظهر على كل الأجهزة
-// https://gist.github.com/اسم-المستخدم/ID
-const GIST_ID = 'YOUR_GIST_ID_HERE';
-
-// ============================================================
-// قاعدة روابط الصور على GitHub
-// ============================================================
-// 👇 غير "اسم-المستخدم" و "اسم-الريبو" حسب حسابك
-const GITHUB_RAW = 'https://raw.githubusercontent.com/karim/teacher-platform/main/images/';
-
-// ============================================================
 // البيانات الافتراضية
 // ============================================================
 function getDefaultData() {
@@ -19,7 +6,7 @@ function getDefaultData() {
     name: 'مستر كريم',
     title: 'معلم العلوم والعلوم المتكاملة - عام ولغات',
     bio: 'ابتدائي - إعدادي - ثانوي',
-    avatar: GITHUB_RAW + 'avatar.jpg',
+    avatar: 'https://i.pravatar.cc/300?img=12',
     counters: { students: 1250, experience: 4, courses: 24, certificates: 12 },
     accounts: [
       { name: 'يوتيوب', url: '#', icon: 'fab fa-youtube', platform: 'youtube' },
@@ -32,24 +19,16 @@ function getDefaultData() {
       { name: 'تويتر', url: '#', icon: 'fab fa-twitter', platform: 'twitter' }
     ],
     certificates: [
-      { name: 'شهادة 1', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.32%20PM.jpeg' },
-      { name: 'شهادة 2', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.33%20PM%20(1).jpeg' },
-      { name: 'شهادة 3', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.34%20PM.jpeg' },
-      { name: 'شهادة 4', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.35%20PM.jpeg' },
-      { name: 'شهادة 5', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.36%20PM.jpeg' },
-      { name: 'شهادة 6', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.37%20PM%20(1).jpeg' },
-      { name: 'شهادة 7', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.37%20PM.jpeg' },
-      { name: 'شهادة 8', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.38%20PM.jpeg' },
-      { name: 'شهادة 9', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.39%20PM.jpeg' },
-      { name: 'شهادة 10', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.40%20PM.jpeg' },
-      { name: 'شهادة 11', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.41%20PM.jpeg' },
-      { name: 'شهادة 12', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.42%20PM%20(1).jpeg' },
-      { name: 'شهادة 13', url: GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.42%20PM.jpeg' }
+      { name: 'Microsoft Certified Educator', url: 'https://picsum.photos/seed/cert1/400/300' },
+      { name: 'Education Expert', url: 'https://picsum.photos/seed/cert2/400/300' },
+      { name: 'Problem Solving Skills', url: 'https://picsum.photos/seed/cert3/400/300' },
+      { name: 'Microsoft Office 2019', url: 'https://picsum.photos/seed/cert4/400/300' }
     ],
     gallery: [
-      GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.32%20PM.jpeg',
-      GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.33%20PM%20(1).jpeg',
-      GITHUB_RAW + 'WhatsApp%20Image%202026-07-05%20at%206.00.34%20PM.jpeg'
+      'https://picsum.photos/seed/teach1/400/300',
+      'https://picsum.photos/seed/teach2/400/300',
+      'https://picsum.photos/seed/teach3/400/300',
+      'https://picsum.photos/seed/teach4/400/300'
     ],
     achievements: [
       { icon: 'fa-award', number: 12, label: 'جوائز' },
@@ -62,37 +41,17 @@ function getDefaultData() {
 let data = {};
 
 // ============================================================
-// تحميل البيانات من Gist
+// تحميل البيانات
 // ============================================================
-async function loadData() {
+function loadData() {
   try {
-    const response = await fetch(`https://api.github.com/gists/${GIST_ID}`);
-    if (response.ok) {
-      const result = await response.json();
-      const content = result.files['data.json']?.content;
-      if (content) {
-        const parsed = JSON.parse(content);
-        if (Object.keys(parsed).length > 0) {
-          data = parsed;
-          localStorage.setItem('teacherData', JSON.stringify(data));
-          renderAll();
-          hideLoading();
-          return;
-        }
-      }
-    }
-  } catch (e) {
-    console.log('فشل التحميل من Gist');
-  }
-  
-  const localSaved = localStorage.getItem('teacherData');
-  if (localSaved) {
-    try {
-      data = JSON.parse(localSaved);
-    } catch (e) {
+    const saved = localStorage.getItem('teacherData');
+    if (saved) {
+      data = JSON.parse(saved);
+    } else {
       data = getDefaultData();
     }
-  } else {
+  } catch (e) {
     data = getDefaultData();
   }
   renderAll();
@@ -100,34 +59,14 @@ async function loadData() {
 }
 
 // ============================================================
-// حفظ البيانات في Gist
+// حفظ البيانات
 // ============================================================
-async function saveData() {
-  localStorage.setItem('teacherData', JSON.stringify(data));
-  showSaveNotice();
-  
-  if (GIST_ID === 'YOUR_GIST_ID_HERE') {
-    console.log('⚠️ يرجى إضافة Gist ID في الكود');
-    return;
-  }
-  
+function saveData() {
   try {
-    const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        files: {
-          'data.json': {
-            content: JSON.stringify(data, null, 2)
-          }
-        }
-      })
-    });
-    if (response.ok) {
-      console.log('✅ تم حفظ البيانات في Gist');
-    }
+    localStorage.setItem('teacherData', JSON.stringify(data));
+    showSaveNotice();
   } catch (e) {
-    console.log('⚠️ فشل الحفظ في Gist');
+    console.log('خطأ في حفظ البيانات');
   }
 }
 
@@ -151,6 +90,7 @@ function hideLoading() {
 // ============================================================
 function renderAll() {
   try {
+    // Profile
     const displayName = document.getElementById('display-name');
     const displayTitle = document.getElementById('display-title');
     const displayBio = document.getElementById('display-bio');
@@ -161,6 +101,7 @@ function renderAll() {
     if (displayBio) displayBio.textContent = data.bio;
     if (profileAvatar) profileAvatar.src = data.avatar;
 
+    // Dashboard inputs
     const editName = document.getElementById('edit-name');
     const editTitle = document.getElementById('edit-title');
     const editBio = document.getElementById('edit-bio');
@@ -171,6 +112,7 @@ function renderAll() {
     if (editBio) editBio.value = data.bio;
     if (avatarUrl) avatarUrl.value = data.avatar;
 
+    // Counters
     const counters = ['students', 'experience', 'courses', 'certificates'];
     counters.forEach(key => {
       const input = document.getElementById('counter-' + key);
@@ -207,9 +149,7 @@ function renderAccounts() {
       list.innerHTML = data.accounts.map((acc, idx) => `
         <div class="list-item">
           <span class="item-name"><i class="${acc.icon}"></i> ${acc.name}</span>
-          <div>
-            <button class="btn-danger" onclick="removeAccount(${idx})">حذف</button>
-          </div>
+          <button class="btn-danger" onclick="removeAccount(${idx})">حذف</button>
         </div>
       `).join('');
     }
@@ -355,6 +295,7 @@ function updateCounters() {
   }
 }
 
+// Counter Edit Popup
 let currentCounterKey = '';
 
 function openCounterEdit(key) {
