@@ -107,13 +107,32 @@
       <div id="account-list" class="item-list"></div>
     </div>
 
-    <div class="control-group">
-      <h4>📜 إدارة الشهادات</h4>
-      <input id="new-cert-name" placeholder="اسم الشهادة" />
-      <input id="new-cert-url" placeholder="رابط الصورة" />
-      <button class="btn-primary" onclick="addCertificate()">إضافة شهادة</button>
-      <div id="cert-list" class="item-list"></div>
+   <div class="control-group">
+  <h4>📜 إدارة الشهادات</h4>
+  
+  <!-- رفع صورة الشهادة من الجهاز -->
+  <div style="border:1px dashed #22c55e; border-radius:12px; padding:12px; margin-bottom:12px;">
+    <label style="font-size:0.9rem; color:#22c55e;"><i class="fas fa-upload"></i> رفع صورة الشهادة من جهازك</label>
+    <input type="file" id="certFileInput" accept="image/*" style="margin:8px 0; padding:8px; border:1px solid #ddd; border-radius:12px; width:100%;" />
+    <div id="certPreview" style="display:none; margin:8px 0; text-align:center;">
+      <img id="certPreviewImg" style="max-width:100%; max-height:150px; border-radius:12px; border:2px solid #22c55e;" />
+      <br>
+      <button class="btn-success btn-sm" onclick="useUploadedCertImage()" style="margin-top:8px;">
+        <i class="fas fa-check"></i> استخدام هذه الصورة للشهادة
+      </button>
+      <button class="btn-secondary btn-sm" onclick="clearCertUpload()" style="margin-top:8px;">
+        إلغاء
+      </button>
     </div>
+  </div>
+
+  <label>اسم الشهادة</label>
+  <input id="new-cert-name" placeholder="مثال: Microsoft Certified Educator" />
+  <label>رابط الصورة (أو استخدم الرفع أعلاه)</label>
+  <input id="new-cert-url" placeholder="رابط الصورة" />
+  <button class="btn-primary" onclick="addCertificate()">إضافة شهادة</button>
+  <div id="cert-list" class="item-list"></div>
+</div>
 
     <div class="control-group">
       <h4>🖼️ إدارة معرض الصور</h4>
